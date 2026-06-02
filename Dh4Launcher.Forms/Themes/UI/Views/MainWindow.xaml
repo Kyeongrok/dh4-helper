@@ -74,6 +74,30 @@
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
                                     Orientation="Vertical">
+
+                                    <!--  게임 폴더 표시 + 변경  -->
+                                    <TextBlock
+                                        Margin="0,0,0,4"
+                                        FontSize="14"
+                                        Foreground="#CCCCCC"
+                                        Text="게임 폴더" />
+                                    <TextBlock
+                                        Width="220"
+                                        FontSize="11"
+                                        Foreground="#9A9A9A"
+                                        Text="{Binding GamePath}"
+                                        TextTrimming="CharacterEllipsis"
+                                        ToolTip="{Binding GamePath}" />
+                                    <Button
+                                        Width="220"
+                                        Height="30"
+                                        Margin="0,4,0,16"
+                                        Background="#5A5A5A"
+                                        Command="{Binding ChangeGamePathCommand}"
+                                        Content="폴더 변경"
+                                        FontSize="12"
+                                        Style="{StaticResource FlatButton}" />
+
                                     <TextBlock
                                         Margin="0,0,0,8"
                                         FontSize="14"
@@ -306,6 +330,12 @@
                                         FontSize="12"
                                         Foreground="#6FCF6F"
                                         Text="{Binding StatusMessage}" />
+                                    <TextBlock
+                                        Margin="0,4,0,0"
+                                        HorizontalAlignment="Center"
+                                        FontSize="11"
+                                        Foreground="#E0B45C"
+                                        Text="{Binding UpdateStatus}" />
                                 </StackPanel>
                             </Grid>
                         </Grid>

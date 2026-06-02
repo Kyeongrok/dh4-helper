@@ -44,6 +44,7 @@ public class App : Application
         services.AddSingleton<IGameLauncherService, GameLauncherService>();
         services.AddSingleton<IGpuService, GpuService>();
         services.AddSingleton<IKeyMappingService, KeyMappingService>();
+        services.AddSingleton<IUpdateService, UpdateService>();
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<MainWindow>();
     }

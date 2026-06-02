@@ -13,6 +13,7 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly IGameLauncherService _launcher;
     private readonly IGpuService _gpu;
     private readonly IKeyMappingService _keymap;
+    private readonly IUpdateService _updates;
 
     private readonly string? _gpuName;
     private bool GpuExists => _gpuName is not null;
@@ -54,6 +55,12 @@ public partial class MainWindowViewModel : ObservableObject
     private string _statusMessage = string.Empty;
 
     [ObservableProperty]
+    private string _gamePath = string.Empty;
+
+    [ObservableProperty]
+    private string _updateStatus = string.Empty;
+
+    [ObservableProperty]
     private string _gpuStatus = string.Empty;
 
     [ObservableProperty]
@@ -86,18 +93,54 @@ public partial class MainWindowViewModel : ObservableObject
     private string _keyMapStatus = string.Empty;
 
     public MainWindowViewModel(IGameSettingsService settings, IGameLauncherService launcher,
-        IGpuService gpu, IKeyMappingService keymap)
+        IGpuService gpu, IKeyMappingService keymap, IUpdateService updates)
     {
         _settings = settings;
         _launcher = launcher;
         _gpu = gpu;
         _keymap = keymap;
+        _updates = updates;
         _gpuName = _gpu.HighPerformanceGpuName;
 
         SelectedLanguage = Languages.First(l => l.Language == GameLanguage.Korean);
         Load();
+        RefreshAll();
+        _ = CheckForUpdatesAsync();
+    }
+
+    /// <summary>게임 경로 표시 + GPU/키매핑 상태를 현재 폴더 기준으로 새로고침.</summary>
+    private void RefreshAll()
+    {
+        GamePath = string.IsNullOrEmpty(_launcher.GameDirectory)
+            ? "(미설정 — '게임 실행' 또는 '폴더 변경'으로 지정)"
+            : _launcher.GameDirectory!;
         RefreshGpuStatus();
         LoadKeyMap();
+    }
+
+    /// <summary>게임 실행 파일(폴더)을 사용자가 직접 다시 지정한다.</summary>
+    [RelayCommand]
+    private void ChangeGamePath()
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = "게임 실행 파일 선택 (DK4HD_*.exe)",
+            Filter = "DK4HD 실행 파일|DK4HD_*.exe|실행 파일 (*.exe)|*.exe",
+        };
+
+        if (dialog.ShowDialog() != true)
+            return;
+
+        _launcher.GameDirectory = Path.GetDirectoryName(dialog.FileName);
+        RefreshAll();
+        StatusMessage = $"게임 폴더 변경: {_launcher.GameDirectory}";
+    }
+
+    private async Task CheckForUpdatesAsync()
+    {
+        var version = await _updates.CheckAndStageAsync();
+        if (version is not null)
+            UpdateStatus = $"새 버전 {version} 준비됨 · 다음 실행 시 자동 적용";
     }
 
     /// <summary>지정 VK에 해당하는 콤보 항목을 찾고, 목록에 없으면 동적으로 추가한다.</summary>
