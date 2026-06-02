@@ -1,0 +1,83 @@
+name: Build and Release
+
+# v* 태그를 push 하면 실행됨 (예: git tag v1.0.0 && git push origin v1.0.0)
+# 대상 저장소: https://github.com/Kyeongrok/dh4-helper
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Get version from tag
+        id: version
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $version = $tag.TrimStart('v')
+          $parts = $version.Split('.')
+          while ($parts.Count -lt 3) { $parts += '0' }
+          $version = $parts -join '.'
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Restore
+        run: dotnet restore Dh4Launcher/Dh4Launcher.csproj
+
+      - name: Publish (self-contained = 런타임 미설치 PC에서도 실행)
+        # --self-contained true: .NET 8 SDK에서는 csproj의 RID만으로 self-contained가 안 되므로 명시해야 한다.
+        #   (생략 시 framework-dependent로 빌드되어 포터블/설치본 모두 .NET Desktop Runtime 설치가 필요해짐)
+        run: dotnet publish Dh4Launcher/Dh4Launcher.csproj -c Release -o publish --self-contained true -p:Version=${{ steps.version.outputs.version }} -p:AssemblyVersion=${{ steps.version.outputs.version }} -p:FileVersion=${{ steps.version.outputs.version }} -p:InformationalVersion=${{ steps.version.outputs.version }}
+
+      # ----- 셋업 파일 + 포터블 zip: Velopack 으로 한 번에 생성 -----
+      # vpk pack 은 Setup.exe 와 함께 '*-Portable.zip'(설치 없이 압축 풀고 실행)도 같이 만든다.
+      - name: Install vpk
+        # CLI와 라이브러리(Velopack 0.0.1298) 버전 일치시켜 호환성 문제 회피
+        run: dotnet tool install -g vpk --version 0.0.1298
+
+      - name: Download previous release for delta updates
+        shell: pwsh
+        run: vpk download github --repoUrl https://github.com/Kyeongrok/dh4-helper --token ${{ secrets.GITHUB_TOKEN }} --outputDir releases
+        continue-on-error: true
+
+      - name: Pack with Velopack
+        # --mainExe: Setup.exe bootstrapper의 entry point exe. 누락 시 Setup.exe 생성이 skip됨.
+        # --packTitle / --packAuthors: 설치 UI·시작 메뉴 등에 표시되는 이름.
+        run: vpk pack --packId Dh4Launcher --packTitle "Dh4Launcher" --packAuthors "Kyeongrok" --packVersion ${{ steps.version.outputs.version }} --packDir publish --mainExe Dh4Launcher.exe --outputDir releases
+
+      - name: List releases folder (debug)
+        shell: pwsh
+        run: |
+          Write-Host "=== releases 폴더 내용 ==="
+          Get-ChildItem -Path releases -Recurse | Select-Object FullName, Length | Format-Table -AutoSize
+          $setup = Get-ChildItem -Path releases -Filter "*Setup.exe" -Recurse
+          if ($setup) { Write-Host "✓ Setup.exe 발견: $($setup.FullName)" } else { Write-Host "✗ Setup.exe 없음" }
+          $portable = Get-ChildItem -Path releases -Filter "*-Portable.zip" -Recurse
+          if ($portable) { Write-Host "✓ Portable.zip 발견: $($portable.FullName)" } else { Write-Host "✗ Portable.zip 없음" }
+
+      - name: Upload Setup.exe to GitHub Releases
+        # --publish: draft가 아니라 정식 릴리즈로 업로드.
+        # --merge: tag push로 자동 생성된 빈 릴리즈가 있으면 그쪽에 에셋을 병합.
+        run: vpk upload github --repoUrl https://github.com/Kyeongrok/dh4-helper --token ${{ secrets.GITHUB_TOKEN }} --tag ${{ github.ref_name }} --releaseName "${{ github.ref_name }}" --outputDir releases --publish --merge
+
+      # ----- Velopack이 만든 포터블 zip을 같은 릴리즈에 추가 (vpk upload는 Setup/업데이트 파일만 올리므로 별도 첨부) -----
+      - name: Upload portable zip to the release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $portable = Get-ChildItem -Path releases -Filter "*-Portable.zip" -Recurse | Select-Object -First 1
+          if (-not $portable) { throw "Portable.zip 를 찾지 못했습니다." }
+          gh release upload ${{ github.ref_name }} $portable.FullName --clobber

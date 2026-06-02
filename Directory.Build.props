@@ -1,0 +1,9 @@
+<Project>
+    <PropertyGroup>
+        <!--
+          CommunityToolkit.Mvvm 8.4+ 는 Microsoft.Windows.SDK.NET.Ref >= 10.0.19041.56 을 요구한다.
+          여기서 핀 고정해 설치된 .NET SDK 번들 버전과 무관하게 build/publish가 동작하도록 한다.
+        -->
+        <WindowsSdkPackageVersion>10.0.19041.56</WindowsSdkPackageVersion>
+    </PropertyGroup>
+</Project>
