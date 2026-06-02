@@ -12,9 +12,12 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly IGameSettingsService _settings;
     private readonly IGameLauncherService _launcher;
     private readonly IGpuService _gpu;
+    private readonly IKeyMappingService _keymap;
 
     private readonly string? _gpuName;
     private bool GpuExists => _gpuName is not null;
+
+    private bool _keyMapAvailable;
 
     /// <summary>
     /// 선택 가능한 해상도. 원본 런처와 달리 1920x1080 위쪽(QHD/4K)도 포함한다.
@@ -58,16 +61,136 @@ public partial class MainWindowViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(CancelGpuCommand))]
     private bool _isGpuApplied;
 
-    public MainWindowViewModel(IGameSettingsService settings, IGameLauncherService launcher, IGpuService gpu)
+    /// <summary>돛 조타 좌/우에 지정 가능한 키 목록 (Vk = Virtual-Key 코드).</summary>
+    public ObservableCollection<KeyOption> Keys { get; } =
+    [
+        new("A", 0x41), new("D", 0x44), new("W", 0x57), new("S", 0x53),
+        new("Q", 0x51), new("E", 0x45), new("Z", 0x5A), new("X", 0x58),
+        new("← 왼쪽 화살표", 0x25), new("→ 오른쪽 화살표", 0x27),
+        new("↑ 위 화살표", 0x26), new("↓ 아래 화살표", 0x28),
+    ];
+
+    [ObservableProperty]
+    private KeyOption? _leftKey;
+
+    [ObservableProperty]
+    private KeyOption? _rightKey;
+
+    [ObservableProperty]
+    private KeyOption? _upKey;
+
+    [ObservableProperty]
+    private KeyOption? _downKey;
+
+    [ObservableProperty]
+    private string _keyMapStatus = string.Empty;
+
+    public MainWindowViewModel(IGameSettingsService settings, IGameLauncherService launcher,
+        IGpuService gpu, IKeyMappingService keymap)
     {
         _settings = settings;
         _launcher = launcher;
         _gpu = gpu;
+        _keymap = keymap;
         _gpuName = _gpu.HighPerformanceGpuName;
 
         SelectedLanguage = Languages.First(l => l.Language == GameLanguage.Korean);
         Load();
         RefreshGpuStatus();
+        LoadKeyMap();
+    }
+
+    /// <summary>지정 VK에 해당하는 콤보 항목을 찾고, 목록에 없으면 동적으로 추가한다.</summary>
+    private KeyOption OptionForVk(byte vk)
+    {
+        var found = Keys.FirstOrDefault(k => k.Vk == vk);
+        if (found is not null)
+            return found;
+        var custom = new KeyOption($"0x{vk:X2}", vk);
+        Keys.Add(custom);
+        return custom;
+    }
+
+    private void LoadKeyMap()
+    {
+        // 키매핑은 한국어 exe(DK4HD_kr.exe)만 지원한다.
+        var exe = _launcher.FindExecutable(GameLanguage.Korean);
+        if (exe is null)
+        {
+            _keyMapAvailable = false;
+            KeyMapStatus = "DK4HD_kr.exe를 찾을 수 없음 (게임 실행 한 번 후 인식됨)";
+        }
+        else
+        {
+            var state = _keymap.Read(exe);
+            if (state is null)
+            {
+                _keyMapAvailable = false;
+                KeyMapStatus = "이 exe는 키매핑 미지원 (시그니처 불일치)";
+            }
+            else
+            {
+                _keyMapAvailable = true;
+                LeftKey = OptionForVk(state.LeftVk);
+                RightKey = OptionForVk(state.RightVk);
+                UpKey = OptionForVk(state.UpVk);
+                DownKey = OptionForVk(state.DownVk);
+                KeyMapStatus = $"현재: 돛 좌={LeftKey.Display}/우={RightKey.Display}, 선회 위={UpKey.Display}/아래={DownKey.Display}";
+            }
+        }
+
+        ApplyKeyMapCommand.NotifyCanExecuteChanged();
+        RestoreKeyMapCommand.NotifyCanExecuteChanged();
+    }
+
+    private bool CanEditKeyMap() => _keyMapAvailable;
+
+    [RelayCommand(CanExecute = nameof(CanEditKeyMap))]
+    private void ApplyKeyMap()
+    {
+        if (LeftKey is null || RightKey is null || UpKey is null || DownKey is null)
+            return;
+        WriteKeyMap(LeftKey.Vk, RightKey.Vk, UpKey.Vk, DownKey.Vk);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanEditKeyMap))]
+    private void RestoreKeyMap()
+    {
+        LeftKey = OptionForVk(_keymap.DefaultLeftVk);
+        RightKey = OptionForVk(_keymap.DefaultRightVk);
+        UpKey = OptionForVk(_keymap.DefaultUpVk);
+        DownKey = OptionForVk(_keymap.DefaultDownVk);
+        WriteKeyMap(_keymap.DefaultLeftVk, _keymap.DefaultRightVk, _keymap.DefaultUpVk, _keymap.DefaultDownVk);
+    }
+
+    private void WriteKeyMap(byte leftVk, byte rightVk, byte upVk, byte downVk)
+    {
+        var exe = _launcher.FindExecutable(GameLanguage.Korean);
+        if (exe is null)
+        {
+            KeyMapStatus = "DK4HD_kr.exe를 찾을 수 없습니다.";
+            return;
+        }
+
+        if (_keymap.IsGameRunning())
+        {
+            KeyMapStatus = "게임이 실행 중입니다. 종료한 뒤 다시 적용하세요.";
+            return;
+        }
+
+        try
+        {
+            _keymap.Apply(exe, leftVk, rightVk, upVk, downVk);
+            KeyMapStatus = $"적용됨: 돛 좌={LeftKey?.Display}/우={RightKey?.Display}, 선회 위={UpKey?.Display}/아래={DownKey?.Display}";
+        }
+        catch (IOException)
+        {
+            KeyMapStatus = "파일이 잠겨 있습니다 (게임 종료 후 재시도).";
+        }
+        catch (Exception ex)
+        {
+            KeyMapStatus = $"실패: {ex.Message}";
+        }
     }
 
     // 언어를 바꾸면 실행 파일이 달라지므로 GPU 적용 상태를 다시 읽는다.
