@@ -55,7 +55,7 @@ jobs:
       - name: Pack with Velopack
         # --mainExe: Setup.exe bootstrapper의 entry point exe. 누락 시 Setup.exe 생성이 skip됨.
         # --packTitle / --packAuthors: 설치 UI·시작 메뉴 등에 표시되는 이름.
-        run: vpk pack --packId Dh4Launcher --packTitle "Dh4Launcher" --packAuthors "Kyeongrok" --packVersion ${{ steps.version.outputs.version }} --packDir publish --mainExe Dh4Launcher.exe --outputDir releases
+        run: vpk pack --packId Dh4Launcher --packTitle "Dh4Launcher" --packAuthors "Kyeongrok" --packVersion ${{ steps.version.outputs.version }} --packDir publish --mainExe Dh4Launcher.exe --outputDir releases --icon Dh4Launcher/app.ico
 
       - name: List releases folder (debug)
         shell: pwsh
