@@ -112,9 +112,23 @@ public class PortraitService : IPortraitService
         if (encoded.Length != t.DataLen)
             throw new InvalidOperationException($"인코딩 크기 불일치 ({encoded.Length} != {t.DataLen}).");
 
+        // 전체 파일 백업(최초 1회) — 통째로 복구용
         var bak = portraitPath + ".bak";
         if (!File.Exists(bak))
             File.Copy(portraitPath, bak);
+
+        // 원본 이미지 자동 백업 — 교체 전 해당 인덱스를 PNG로 저장(인덱스별 최초 1회만 = 진짜 원본 보존)
+        var bakDir = Path.Combine(Path.GetDirectoryName(portraitPath)!, "portrait_backup");
+        Directory.CreateDirectory(bakDir);
+        var imgBak = Path.Combine(bakDir, $"{Path.GetFileNameWithoutExtension(portraitPath)}_{index:00}.png");
+        if (!File.Exists(imgBak))
+        {
+            var orig = DecodeToBitmap(d, t); // d는 아직 원본 상태
+            using var bfs = File.Create(imgBak);
+            var penc = new PngBitmapEncoder();
+            penc.Frames.Add(BitmapFrame.Create(orig));
+            penc.Save(bfs);
+        }
 
         Array.Copy(encoded, 0, d, t.DataOffset, t.DataLen);
         File.WriteAllBytes(portraitPath, d);

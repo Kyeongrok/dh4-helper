@@ -157,7 +157,7 @@ public partial class PortraitViewModel : ObservableObject
                 Portraits[slot] = refreshed;
                 Selected = refreshed;
             }
-            Status = $"{index}번 초상화 교체 완료";
+            Status = $"{index}번 교체 완료 (원본은 portrait_backup 폴더에 백업됨)";
         }
         catch (IOException)
         {
