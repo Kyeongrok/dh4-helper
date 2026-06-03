@@ -6,5 +6,6 @@
         <ResourceDictionary Source="/Dh4Launcher.Support;component/Themes/Units/CloseButton.xaml" />
         <ResourceDictionary Source="/Dh4Launcher.Support;component/Themes/Units/GameButton.xaml" />
         <ResourceDictionary Source="/Dh4Launcher.Support;component/Themes/Units/GameFrameButton.xaml" />
+        <ResourceDictionary Source="/Dh4Launcher.Support;component/Themes/Units/GameLabel.xaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

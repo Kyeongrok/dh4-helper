@@ -92,11 +92,7 @@
                                     <StackPanel Width="220" Orientation="Vertical">
 
                                     <!--  게임 폴더 표시 + 변경  -->
-                                    <TextBlock
-                                        Margin="0,0,0,4"
-                                        FontSize="14"
-                                        Foreground="#CCCCCC"
-                                        Text="게임 폴더" />
+                                    <support:GameLabel Margin="0,0,0,6" Content="게임 폴더" />
                                     <TextBlock
                                         Width="220"
                                         FontSize="11"
@@ -112,11 +108,7 @@
                                         Content="폴더 변경"
                                         FontSize="13" />
 
-                                    <TextBlock
-                                        Margin="0,0,0,8"
-                                        FontSize="14"
-                                        Foreground="#CCCCCC"
-                                        Text="해상도" />
+                                    <support:GameLabel Margin="0,0,0,6" Content="해상도" />
                                     <ComboBox
                                         Width="220"
                                         Padding="8,4"
@@ -137,11 +129,7 @@
                                         Content="해상도 적용"
                                         FontSize="14" />
 
-                                    <TextBlock
-                                        Margin="0,16,0,8"
-                                        FontSize="14"
-                                        Foreground="#CCCCCC"
-                                        Text="언어" />
+                                    <support:GameLabel Margin="0,16,0,6" Content="언어" />
                                     <ComboBox
                                         Width="220"
                                         Padding="8,4"
@@ -150,11 +138,7 @@
                                         SelectedItem="{Binding SelectedLanguage}" />
 
                                     <!--  고성능 GPU 설정  -->
-                                    <TextBlock
-                                        Margin="0,16,0,4"
-                                        FontSize="14"
-                                        Foreground="#CCCCCC"
-                                        Text="고성능 GPU" />
+                                    <support:GameLabel Margin="0,16,0,6" Content="고성능 GPU" />
                                     <TextBlock
                                         Width="220"
                                         FontSize="11"
@@ -216,11 +200,7 @@
                                         Orientation="Vertical">
 
                                     <!--  방향 키 매핑 (DK4HD_kr.exe 패치)  -->
-                                    <TextBlock
-                                        Margin="0,0,0,4"
-                                        FontSize="14"
-                                        Foreground="#CCCCCC"
-                                        Text="돛 조타 키 (좌/우)" />
+                                    <support:GameLabel Margin="0,0,0,6" Content="돛 조타 키 (좌/우)" />
                                     <StackPanel Width="220" Orientation="Horizontal">
                                         <StackPanel Width="105">
                                             <TextBlock
@@ -248,11 +228,7 @@
                                         </StackPanel>
                                     </StackPanel>
 
-                                    <TextBlock
-                                        Margin="0,10,0,4"
-                                        FontSize="14"
-                                        Foreground="#CCCCCC"
-                                        Text="배 선회 키 (위/아래)" />
+                                    <support:GameLabel Margin="0,12,0,6" Content="배 선회 키 (위/아래)" />
                                     <StackPanel Width="220" Orientation="Horizontal">
                                         <StackPanel Width="105">
                                             <TextBlock
@@ -280,11 +256,7 @@
                                         </StackPanel>
                                     </StackPanel>
 
-                                    <TextBlock
-                                        Margin="0,10,0,4"
-                                        FontSize="14"
-                                        Foreground="#CCCCCC"
-                                        Text="지도 키 (기본 F1)" />
+                                    <support:GameLabel Margin="0,12,0,6" Content="지도 키 (기본 F1)" />
                                     <ComboBox
                                         Width="220"
                                         Padding="8,4"
@@ -293,11 +265,7 @@
                                         SelectedItem="{Binding MapKey}" />
 
                                     <!--  보조 키 (넘패드 기능 재매핑)  -->
-                                    <TextBlock
-                                        Margin="0,10,0,4"
-                                        FontSize="14"
-                                        Foreground="#CCCCCC"
-                                        Text="보조 키 (넘패드 기능)" />
+                                    <support:GameLabel Margin="0,12,0,6" Content="보조 키 (넘패드 기능)" />
                                     <StackPanel Width="220" Orientation="Horizontal">
                                         <StackPanel Width="105">
                                             <TextBlock
