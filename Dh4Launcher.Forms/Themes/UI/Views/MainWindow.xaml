@@ -2,7 +2,10 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:support="clr-namespace:Dh4Launcher.Support.UI.Units;assembly=Dh4Launcher.Support"
+    xmlns:conv="clr-namespace:Dh4Launcher.Forms.Converters"
     xmlns:views="clr-namespace:Dh4Launcher.Forms.UI.Views">
+
+    <conv:EqualsVisibilityConverter x:Key="EqVis" />
 
     <!--  배경색은 버튼별로 지정, 호버/비활성은 투명도로 처리해 색에 무관하게 동작  -->
     <Style x:Key="FlatButton" TargetType="Button">
@@ -41,6 +44,13 @@
                 <ControlTemplate TargetType="{x:Type views:MainWindow}">
                     <!--  액자 프레임: 금색/갈색 그라데이션 테두리 + 갈색 배경  -->
                     <Border BorderBrush="#241809" BorderThickness="1">
+                        <Border.Resources>
+                            <ResourceDictionary>
+                                <ResourceDictionary.MergedDictionaries>
+                                    <ResourceDictionary Source="/Dh4Launcher.Support;component/Themes/Units/ScrollBarStyle.xaml" />
+                                </ResourceDictionary.MergedDictionaries>
+                            </ResourceDictionary>
+                        </Border.Resources>
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                                 <GradientStop Offset="0" Color="#F0DEAA" />
@@ -82,7 +92,57 @@
 
                             <!--  Content Area  -->
                             <Grid Grid.Row="1">
-                                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <!--  탭 바  -->
+                                <StackPanel
+                                    Grid.Row="0"
+                                    Margin="10,8,0,4"
+                                    Orientation="Horizontal">
+                                    <support:GameTabButton
+                                        Width="96"
+                                        Command="{Binding SelectTabCommand}"
+                                        CommandParameter="0"
+                                        Content="설정">
+                                        <support:GameTabButton.Style>
+                                            <Style TargetType="{x:Type support:GameTabButton}">
+                                                <Setter Property="Opacity" Value="0.5" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding SelectedTab}" Value="0">
+                                                        <Setter Property="Opacity" Value="1" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </support:GameTabButton.Style>
+                                    </support:GameTabButton>
+                                    <support:GameTabButton
+                                        Width="96"
+                                        Margin="8,0,0,0"
+                                        Command="{Binding SelectTabCommand}"
+                                        CommandParameter="1"
+                                        Content="초상화">
+                                        <support:GameTabButton.Style>
+                                            <Style TargetType="{x:Type support:GameTabButton}">
+                                                <Setter Property="Opacity" Value="0.5" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding SelectedTab}" Value="1">
+                                                        <Setter Property="Opacity" Value="1" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </support:GameTabButton.Style>
+                                    </support:GameTabButton>
+                                </StackPanel>
+
+                                <!--  ===== 탭 0: 설정 =====  -->
+                                <ScrollViewer
+                                    Grid.Row="1"
+                                    HorizontalScrollBarVisibility="Disabled"
+                                    VerticalScrollBarVisibility="Disabled"
+                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=0}">
                                 <StackPanel
                                     Margin="0,16"
                                     HorizontalAlignment="Center"
@@ -349,6 +409,81 @@
                                     </StackPanel>
                                 </StackPanel>
                                 </ScrollViewer>
+
+                                <!--  ===== 탭 1: 초상화 =====  -->
+                                <Grid
+                                    Grid.Row="1"
+                                    Margin="10,4,10,10"
+                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=1}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="190" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!--  갤러리  -->
+                                    <ListBox
+                                        Grid.Column="0"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        ItemsSource="{Binding Portrait.Portraits}"
+                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                        SelectedItem="{Binding Portrait.Selected}">
+                                        <ListBox.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel />
+                                            </ItemsPanelTemplate>
+                                        </ListBox.ItemsPanel>
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Width="86" Margin="2">
+                                                    <Image Width="80" Source="{Binding Thumbnail}" />
+                                                    <TextBlock
+                                                        HorizontalAlignment="Center"
+                                                        FontSize="11"
+                                                        Foreground="#EEEEEE"
+                                                        Text="{Binding Index}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+
+                                    <!--  미리보기 + 컨트롤  -->
+                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                        <ComboBox
+                                            Margin="0,0,0,6"
+                                            Padding="8,4"
+                                            DisplayMemberPath="Display"
+                                            FontSize="12"
+                                            ItemsSource="{Binding Portrait.Files}"
+                                            SelectedItem="{Binding Portrait.SelectedFile}" />
+                                        <Border Background="#33000000" CornerRadius="4" Padding="4">
+                                            <Image
+                                                Height="220"
+                                                Source="{Binding Portrait.FullImage}"
+                                                Stretch="Uniform" />
+                                        </Border>
+                                        <TextBlock
+                                            Margin="0,6,0,0"
+                                            FontSize="12"
+                                            Foreground="#DDDDDD"
+                                            Text="{Binding Portrait.Status}"
+                                            TextWrapping="Wrap" />
+                                        <support:GameFrameButton
+                                            Height="38"
+                                            Margin="0,8,0,0"
+                                            MinWidth="0"
+                                            Command="{Binding Portrait.ReplaceCommand}"
+                                            Content="이미지로 교체"
+                                            FontSize="13" />
+                                        <support:GameFrameButton
+                                            Height="34"
+                                            Margin="0,6,0,0"
+                                            MinWidth="0"
+                                            Command="{Binding Portrait.ExportCommand}"
+                                            Content="PNG 내보내기"
+                                            FontSize="12" />
+                                    </StackPanel>
+                                </Grid>
                             </Grid>
                         </Grid>
                         </Border>

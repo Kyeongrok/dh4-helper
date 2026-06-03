@@ -7,5 +7,6 @@
         <ResourceDictionary Source="/Dh4Launcher.Support;component/Themes/Units/GameButton.xaml" />
         <ResourceDictionary Source="/Dh4Launcher.Support;component/Themes/Units/GameFrameButton.xaml" />
         <ResourceDictionary Source="/Dh4Launcher.Support;component/Themes/Units/GameLabel.xaml" />
+        <ResourceDictionary Source="/Dh4Launcher.Support;component/Themes/Units/GameTabButton.xaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

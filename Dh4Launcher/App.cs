@@ -45,6 +45,8 @@ public class App : Application
         services.AddSingleton<IGpuService, GpuService>();
         services.AddSingleton<IKeyMappingService, KeyMappingService>();
         services.AddSingleton<IUpdateService, UpdateService>();
+        services.AddSingleton<IPortraitService, PortraitService>();
+        services.AddSingleton<PortraitViewModel>();
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<MainWindow>();
     }

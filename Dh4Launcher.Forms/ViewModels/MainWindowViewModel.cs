@@ -54,6 +54,21 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private string _statusMessage = string.Empty;
 
+    /// <summary>0 = 설정, 1 = 초상화.</summary>
+    [ObservableProperty]
+    private int _selectedTab;
+
+    public PortraitViewModel Portrait { get; }
+
+    partial void OnSelectedTabChanged(int value)
+    {
+        if (value == 1)
+            Portrait.EnsureLoaded();
+    }
+
+    [RelayCommand]
+    private void SelectTab(object? index) => SelectedTab = System.Convert.ToInt32(index);
+
     [ObservableProperty]
     private string _gamePath = string.Empty;
 
@@ -112,13 +127,14 @@ public partial class MainWindowViewModel : ObservableObject
     private string _keyMapStatus = string.Empty;
 
     public MainWindowViewModel(IGameSettingsService settings, IGameLauncherService launcher,
-        IGpuService gpu, IKeyMappingService keymap, IUpdateService updates)
+        IGpuService gpu, IKeyMappingService keymap, IUpdateService updates, PortraitViewModel portrait)
     {
         _settings = settings;
         _launcher = launcher;
         _gpu = gpu;
         _keymap = keymap;
         _updates = updates;
+        Portrait = portrait;
         _gpuName = _gpu.HighPerformanceGpuName;
 
         SelectedLanguage = Languages.First(l => l.Language == GameLanguage.Korean);
