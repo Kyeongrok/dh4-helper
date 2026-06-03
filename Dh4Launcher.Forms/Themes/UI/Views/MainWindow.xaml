@@ -71,7 +71,8 @@
                             <Grid Grid.Row="1">
                                 <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                                 <StackPanel
-                                    Margin="40,16"
+                                    Width="220"
+                                    Margin="0,16"
                                     HorizontalAlignment="Center"
                                     Orientation="Vertical">
 
@@ -88,15 +89,13 @@
                                         Text="{Binding GamePath}"
                                         TextTrimming="CharacterEllipsis"
                                         ToolTip="{Binding GamePath}" />
-                                    <Button
+                                    <support:GameFrameButton
                                         Width="220"
-                                        Height="30"
+                                        Height="38"
                                         Margin="0,4,0,16"
-                                        Background="#5A5A5A"
                                         Command="{Binding ChangeGamePathCommand}"
                                         Content="폴더 변경"
-                                        FontSize="12"
-                                        Style="{StaticResource FlatButton}" />
+                                        FontSize="13" />
 
                                     <TextBlock
                                         Margin="0,0,0,8"
@@ -115,15 +114,13 @@
                                         Content="전체 화면"
                                         Foreground="#CCCCCC"
                                         IsChecked="{Binding IsFullscreen}" />
-                                    <Button
+                                    <support:GameFrameButton
                                         Width="220"
-                                        Height="34"
+                                        Height="40"
                                         Margin="0,10,0,0"
-                                        Background="#0078D4"
                                         Command="{Binding SaveCommand}"
                                         Content="해상도 적용"
-                                        FontSize="13"
-                                        Style="{StaticResource FlatButton}" />
+                                        FontSize="14" />
 
                                     <TextBlock
                                         Margin="0,16,0,8"
@@ -160,23 +157,21 @@
                                         Width="220"
                                         Margin="0,8,0,0"
                                         Orientation="Horizontal">
-                                        <Button
+                                        <support:GameFrameButton
                                             Width="105"
-                                            Height="34"
-                                            Background="#0078D4"
+                                            Height="38"
+                                            MinWidth="0"
                                             Command="{Binding ApplyGpuCommand}"
                                             Content="적용"
-                                            FontSize="13"
-                                            Style="{StaticResource FlatButton}" />
-                                        <Button
+                                            FontSize="13" />
+                                        <support:GameFrameButton
                                             Width="105"
-                                            Height="34"
+                                            Height="38"
                                             Margin="10,0,0,0"
-                                            Background="#5A5A5A"
+                                            MinWidth="0"
                                             Command="{Binding CancelGpuCommand}"
                                             Content="취소"
-                                            FontSize="13"
-                                            Style="{StaticResource FlatButton}" />
+                                            FontSize="13" />
                                     </StackPanel>
 
                                     <!--  방향 키 매핑 (DK4HD_kr.exe 패치)  -->
@@ -260,23 +255,21 @@
                                         Width="220"
                                         Margin="0,8,0,0"
                                         Orientation="Horizontal">
-                                        <Button
+                                        <support:GameFrameButton
                                             Width="105"
-                                            Height="34"
-                                            Background="#0078D4"
+                                            Height="38"
+                                            MinWidth="0"
                                             Command="{Binding ApplyKeyMapCommand}"
                                             Content="적용"
-                                            FontSize="13"
-                                            Style="{StaticResource FlatButton}" />
-                                        <Button
+                                            FontSize="13" />
+                                        <support:GameFrameButton
                                             Width="105"
-                                            Height="34"
+                                            Height="38"
                                             Margin="10,0,0,0"
-                                            Background="#5A5A5A"
+                                            MinWidth="0"
                                             Command="{Binding RestoreKeyMapCommand}"
                                             Content="기본값(←→)"
-                                            FontSize="13"
-                                            Style="{StaticResource FlatButton}" />
+                                            FontSize="12" />
                                     </StackPanel>
                                     <TextBlock
                                         Width="220"
@@ -286,39 +279,12 @@
                                         Text="{Binding KeyMapStatus}"
                                         TextWrapping="Wrap" />
 
-                                    <Button
+                                    <support:GameFrameButton
                                         Width="220"
-                                        Height="44"
+                                        Height="54"
                                         Margin="0,20,0,0"
-                                        Background="#2E7D32"
-                                        BorderThickness="0"
                                         Command="{Binding LaunchCommand}"
-                                        Content="게임 실행"
-                                        FontSize="15"
-                                        FontWeight="SemiBold"
-                                        Foreground="White">
-                                        <Button.Style>
-                                            <Style TargetType="Button">
-                                                <Setter Property="Template">
-                                                    <Setter.Value>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="4">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Setter.Value>
-                                                </Setter>
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Background" Value="#388E3C" />
-                                                    </Trigger>
-                                                    <Trigger Property="IsPressed" Value="True">
-                                                        <Setter Property="Background" Value="#1B5E20" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Button.Style>
-                                    </Button>
+                                        Content="게임 실행" />
 
                                     <TextBlock
                                         Margin="0,16,0,0"

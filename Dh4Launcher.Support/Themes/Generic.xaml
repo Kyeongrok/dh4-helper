@@ -4,5 +4,7 @@
         <ResourceDictionary Source="/Dh4Launcher.Support;component/Themes/Units/MinimizeButton.xaml" />
         <ResourceDictionary Source="/Dh4Launcher.Support;component/Themes/Units/MaximizeButton.xaml" />
         <ResourceDictionary Source="/Dh4Launcher.Support;component/Themes/Units/CloseButton.xaml" />
+        <ResourceDictionary Source="/Dh4Launcher.Support;component/Themes/Units/GameButton.xaml" />
+        <ResourceDictionary Source="/Dh4Launcher.Support;component/Themes/Units/GameFrameButton.xaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>
