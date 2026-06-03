@@ -24,11 +24,21 @@ public class KeyMappingService : IKeyMappingService
     private const long DownVkOffset = 0x421E9;
     private const long MapVkOffset = 0x422F4;
 
+    // 보조(넘패드 기능) 키 — 넘패드 없는 키보드용으로 글자키 재매핑.
+    private const long NumPlusVkOffset = 0x42102;  // 넘패드 +  (슬롯2)
+    private const long NumMinusVkOffset = 0x4212B; // 넘패드 −  (슬롯3)
+    private const long Num4VkOffset = 0x42154;     // 넘패드 4  (슬롯7)
+    private const long Num6VkOffset = 0x42175;     // 넘패드 6  (슬롯5)
+
     public byte DefaultLeftVk => 0x25;  // VK_LEFT
     public byte DefaultRightVk => 0x27; // VK_RIGHT
     public byte DefaultUpVk => 0x26;    // VK_UP
     public byte DefaultDownVk => 0x28;  // VK_DOWN
     public byte DefaultMapVk => 0x70;   // VK_F1
+    public byte DefaultNumPlusVk => 0x6B;  // VK_ADD
+    public byte DefaultNumMinusVk => 0x6D; // VK_SUBTRACT
+    public byte DefaultNum4Vk => 0x64;     // VK_NUMPAD4
+    public byte DefaultNum6Vk => 0x66;     // VK_NUMPAD6
 
     public bool IsSupported(string exePath)
     {
@@ -53,7 +63,9 @@ public class KeyMappingService : IKeyMappingService
             return new KeyMapState(
                 ReadByte(fs, LeftVkOffset), ReadByte(fs, RightVkOffset),
                 ReadByte(fs, UpVkOffset), ReadByte(fs, DownVkOffset),
-                ReadByte(fs, MapVkOffset));
+                ReadByte(fs, MapVkOffset),
+                ReadByte(fs, NumPlusVkOffset), ReadByte(fs, NumMinusVkOffset),
+                ReadByte(fs, Num4VkOffset), ReadByte(fs, Num6VkOffset));
         }
         catch
         {
@@ -61,7 +73,8 @@ public class KeyMappingService : IKeyMappingService
         }
     }
 
-    public void Apply(string exePath, byte leftVk, byte rightVk, byte upVk, byte downVk, byte mapVk)
+    public void Apply(string exePath, byte leftVk, byte rightVk, byte upVk, byte downVk, byte mapVk,
+        byte numPlusVk, byte numMinusVk, byte num4Vk, byte num6Vk)
     {
         using (var rfs = File.OpenRead(exePath))
         {
@@ -79,6 +92,10 @@ public class KeyMappingService : IKeyMappingService
         Write(fs, UpVkOffset, upVk);
         Write(fs, DownVkOffset, downVk);
         Write(fs, MapVkOffset, mapVk);
+        Write(fs, NumPlusVkOffset, numPlusVk);
+        Write(fs, NumMinusVkOffset, numMinusVk);
+        Write(fs, Num4VkOffset, num4Vk);
+        Write(fs, Num6VkOffset, num6Vk);
     }
 
     private static void Write(FileStream fs, long off, byte value)
@@ -102,7 +119,8 @@ public class KeyMappingService : IKeyMappingService
     // 네 곳 모두 'mov ecx, imm32' = B9 [VK] 00 00 00 형태인지 확인 (VK 바이트는 무관).
     private static bool VerifySignature(FileStream fs)
     {
-        foreach (var vkOff in new[] { LeftVkOffset, RightVkOffset, UpVkOffset, DownVkOffset, MapVkOffset })
+        foreach (var vkOff in new[] { LeftVkOffset, RightVkOffset, UpVkOffset, DownVkOffset, MapVkOffset,
+                     NumPlusVkOffset, NumMinusVkOffset, Num4VkOffset, Num6VkOffset })
         {
             if (ReadByte(fs, vkOff - 1) != 0xB9) return false;
             if (ReadByte(fs, vkOff + 1) != 0x00) return false;
