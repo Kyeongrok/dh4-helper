@@ -68,13 +68,16 @@ public partial class MainWindowViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(CancelGpuCommand))]
     private bool _isGpuApplied;
 
-    /// <summary>돛 조타 좌/우에 지정 가능한 키 목록 (Vk = Virtual-Key 코드).</summary>
+    /// <summary>키 매핑에 지정 가능한 키 목록 (Vk = Virtual-Key 코드).</summary>
     public ObservableCollection<KeyOption> Keys { get; } =
     [
         new("A", 0x41), new("D", 0x44), new("W", 0x57), new("S", 0x53),
         new("Q", 0x51), new("E", 0x45), new("Z", 0x5A), new("X", 0x58),
+        new("R", 0x52), new("F", 0x46), new("C", 0x43), new("V", 0x56),
+        new("M", 0x4D), new("T", 0x54), new("G", 0x47), new("B", 0x42),
         new("← 왼쪽 화살표", 0x25), new("→ 오른쪽 화살표", 0x27),
         new("↑ 위 화살표", 0x26), new("↓ 아래 화살표", 0x28),
+        new("F1", 0x70), new("F2", 0x71), new("F3", 0x72), new("F4", 0x73), new("F5", 0x74),
     ];
 
     [ObservableProperty]
@@ -88,6 +91,9 @@ public partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private KeyOption? _downKey;
+
+    [ObservableProperty]
+    private KeyOption? _mapKey;
 
     [ObservableProperty]
     private string _keyMapStatus = string.Empty;
@@ -178,7 +184,8 @@ public partial class MainWindowViewModel : ObservableObject
                 RightKey = OptionForVk(state.RightVk);
                 UpKey = OptionForVk(state.UpVk);
                 DownKey = OptionForVk(state.DownVk);
-                KeyMapStatus = $"현재: 돛 좌={LeftKey.Display}/우={RightKey.Display}, 선회 위={UpKey.Display}/아래={DownKey.Display}";
+                MapKey = OptionForVk(state.MapVk);
+                KeyMapStatus = $"현재: 돛 좌={LeftKey.Display}/우={RightKey.Display}, 선회 위={UpKey.Display}/아래={DownKey.Display}, 지도={MapKey.Display}";
             }
         }
 
@@ -191,9 +198,9 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanEditKeyMap))]
     private void ApplyKeyMap()
     {
-        if (LeftKey is null || RightKey is null || UpKey is null || DownKey is null)
+        if (LeftKey is null || RightKey is null || UpKey is null || DownKey is null || MapKey is null)
             return;
-        WriteKeyMap(LeftKey.Vk, RightKey.Vk, UpKey.Vk, DownKey.Vk);
+        WriteKeyMap(LeftKey.Vk, RightKey.Vk, UpKey.Vk, DownKey.Vk, MapKey.Vk);
     }
 
     [RelayCommand(CanExecute = nameof(CanEditKeyMap))]
@@ -203,10 +210,12 @@ public partial class MainWindowViewModel : ObservableObject
         RightKey = OptionForVk(_keymap.DefaultRightVk);
         UpKey = OptionForVk(_keymap.DefaultUpVk);
         DownKey = OptionForVk(_keymap.DefaultDownVk);
-        WriteKeyMap(_keymap.DefaultLeftVk, _keymap.DefaultRightVk, _keymap.DefaultUpVk, _keymap.DefaultDownVk);
+        MapKey = OptionForVk(_keymap.DefaultMapVk);
+        WriteKeyMap(_keymap.DefaultLeftVk, _keymap.DefaultRightVk, _keymap.DefaultUpVk,
+            _keymap.DefaultDownVk, _keymap.DefaultMapVk);
     }
 
-    private void WriteKeyMap(byte leftVk, byte rightVk, byte upVk, byte downVk)
+    private void WriteKeyMap(byte leftVk, byte rightVk, byte upVk, byte downVk, byte mapVk)
     {
         var exe = _launcher.FindExecutable(GameLanguage.Korean);
         if (exe is null)
@@ -223,8 +232,8 @@ public partial class MainWindowViewModel : ObservableObject
 
         try
         {
-            _keymap.Apply(exe, leftVk, rightVk, upVk, downVk);
-            KeyMapStatus = $"적용됨: 돛 좌={LeftKey?.Display}/우={RightKey?.Display}, 선회 위={UpKey?.Display}/아래={DownKey?.Display}";
+            _keymap.Apply(exe, leftVk, rightVk, upVk, downVk, mapVk);
+            KeyMapStatus = $"적용됨: 돛 좌={LeftKey?.Display}/우={RightKey?.Display}, 선회 위={UpKey?.Display}/아래={DownKey?.Display}, 지도={MapKey?.Display}";
         }
         catch (IOException)
         {
