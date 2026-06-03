@@ -69,10 +69,10 @@
 
                             <!--  Content Area  -->
                             <Grid Grid.Row="1">
+                                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                                 <StackPanel
-                                    Margin="40,0"
+                                    Margin="40,16"
                                     HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
                                     Orientation="Vertical">
 
                                     <!--  게임 폴더 표시 + 변경  -->
@@ -243,6 +243,19 @@
                                                 SelectedItem="{Binding DownKey}" />
                                         </StackPanel>
                                     </StackPanel>
+
+                                    <TextBlock
+                                        Margin="0,10,0,4"
+                                        FontSize="14"
+                                        Foreground="#CCCCCC"
+                                        Text="지도 키 (기본 F1)" />
+                                    <ComboBox
+                                        Width="220"
+                                        Padding="8,4"
+                                        FontSize="13"
+                                        ItemsSource="{Binding Keys}"
+                                        SelectedItem="{Binding MapKey}" />
+
                                     <StackPanel
                                         Width="220"
                                         Margin="0,8,0,0"
@@ -320,6 +333,7 @@
                                         Foreground="#E0B45C"
                                         Text="{Binding UpdateStatus}" />
                                 </StackPanel>
+                                </ScrollViewer>
                             </Grid>
                         </Grid>
                     </Border>

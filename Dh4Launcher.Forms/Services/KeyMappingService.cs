@@ -12,6 +12,7 @@ namespace Dh4Launcher.Forms.Services;
 ///   0x42237 = 우(돛)  : mov ecx, 0x27 (VK_RIGHT)
 ///   0x421A9 = 위(선회): mov ecx, 0x26 (VK_UP,   넘패드8과 OR)
 ///   0x421E9 = 아래(선회): mov ecx, 0x28 (VK_DOWN, 넘패드2와 OR)
+///   0x422F4 = 지도    : mov ecx, 0x70 (VK_F1)
 /// 각 위치는 'B9 [VK] 00 00 00' 형태이며, VK 바이트만 바꾼다.
 /// 안전을 위해 주변 바이트(B9 .. 00 00 00) 시그니처를 검증한 뒤에만 패치한다.
 /// </summary>
@@ -21,11 +22,13 @@ public class KeyMappingService : IKeyMappingService
     private const long RightVkOffset = 0x42237;
     private const long UpVkOffset = 0x421A9;
     private const long DownVkOffset = 0x421E9;
+    private const long MapVkOffset = 0x422F4;
 
     public byte DefaultLeftVk => 0x25;  // VK_LEFT
     public byte DefaultRightVk => 0x27; // VK_RIGHT
     public byte DefaultUpVk => 0x26;    // VK_UP
     public byte DefaultDownVk => 0x28;  // VK_DOWN
+    public byte DefaultMapVk => 0x70;   // VK_F1
 
     public bool IsSupported(string exePath)
     {
@@ -49,7 +52,8 @@ public class KeyMappingService : IKeyMappingService
                 return null;
             return new KeyMapState(
                 ReadByte(fs, LeftVkOffset), ReadByte(fs, RightVkOffset),
-                ReadByte(fs, UpVkOffset), ReadByte(fs, DownVkOffset));
+                ReadByte(fs, UpVkOffset), ReadByte(fs, DownVkOffset),
+                ReadByte(fs, MapVkOffset));
         }
         catch
         {
@@ -57,7 +61,7 @@ public class KeyMappingService : IKeyMappingService
         }
     }
 
-    public void Apply(string exePath, byte leftVk, byte rightVk, byte upVk, byte downVk)
+    public void Apply(string exePath, byte leftVk, byte rightVk, byte upVk, byte downVk, byte mapVk)
     {
         using (var rfs = File.OpenRead(exePath))
         {
@@ -74,6 +78,7 @@ public class KeyMappingService : IKeyMappingService
         Write(fs, RightVkOffset, rightVk);
         Write(fs, UpVkOffset, upVk);
         Write(fs, DownVkOffset, downVk);
+        Write(fs, MapVkOffset, mapVk);
     }
 
     private static void Write(FileStream fs, long off, byte value)
@@ -97,7 +102,7 @@ public class KeyMappingService : IKeyMappingService
     // 네 곳 모두 'mov ecx, imm32' = B9 [VK] 00 00 00 형태인지 확인 (VK 바이트는 무관).
     private static bool VerifySignature(FileStream fs)
     {
-        foreach (var vkOff in new[] { LeftVkOffset, RightVkOffset, UpVkOffset, DownVkOffset })
+        foreach (var vkOff in new[] { LeftVkOffset, RightVkOffset, UpVkOffset, DownVkOffset, MapVkOffset })
         {
             if (ReadByte(fs, vkOff - 1) != 0xB9) return false;
             if (ReadByte(fs, vkOff + 1) != 0x00) return false;
