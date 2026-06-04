@@ -22,6 +22,15 @@ public interface IPortraitService
     /// <summary>모든 초상화를 디코드해 썸네일 목록을 만든다.</summary>
     IReadOnlyList<PortraitItem> Load(string portraitPath, int thumbWidth = 110);
 
+    /// <summary>해당 인덱스 한 개만 디코드해 썸네일 아이템을 만든다.</summary>
+    PortraitItem LoadOne(string portraitPath, int index, int thumbWidth = 110);
+
+    /// <summary>이 파일에 원본 백업(.bak)이 있는지.</summary>
+    bool HasBackup(string portraitPath);
+
+    /// <summary>해당 인덱스를 백업(.bak)의 원본 바이트로 정확 복원한다. 백업 없으면 false.</summary>
+    bool Restore(string portraitPath, int index);
+
     /// <summary>해당 인덱스 초상화를 원본 크기로 디코드.</summary>
     BitmapSource DecodeFull(string portraitPath, int index);
 

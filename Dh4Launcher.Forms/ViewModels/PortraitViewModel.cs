@@ -26,6 +26,7 @@ public partial class PortraitViewModel : ObservableObject
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ExportCommand))]
     [NotifyCanExecuteChangedFor(nameof(ReplaceCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RestoreCommand))]
     private PortraitItem? _selected;
 
     [ObservableProperty]
@@ -155,17 +156,9 @@ public partial class PortraitViewModel : ObservableObject
         try
         {
             _portraits.Replace(_portraitPath, index, dialog.FileName);
-            // 썸네일 + 미리보기 갱신
-            var newFull = _portraits.DecodeFull(_portraitPath, index);
-            FullImage = newFull;
-            var refreshed = _portraits.Load(_portraitPath)[index];
-            var slot = Portraits.IndexOf(Selected);
-            if (slot >= 0)
-            {
-                Portraits[slot] = refreshed;
-                Selected = refreshed;
-            }
-            Status = $"{index}번 교체 완료 (원본은 portrait_backup 폴더에 백업됨)";
+            RefreshSlot(index);
+            RestoreCommand.NotifyCanExecuteChanged(); // 교체로 백업이 생겼으니 되돌리기 활성화
+            Status = $"{index}번 교체 완료 (원본 자동 백업됨 · '원본으로 되돌리기'로 복구 가능)";
         }
         catch (IOException)
         {
@@ -174,6 +167,48 @@ public partial class PortraitViewModel : ObservableObject
         catch (Exception ex)
         {
             Status = $"교체 실패: {ex.Message}";
+        }
+    }
+
+    private bool CanRestore() => HasSelection() && _portraits.HasBackup(_portraitPath!);
+
+    [RelayCommand(CanExecute = nameof(CanRestore))]
+    private void Restore()
+    {
+        if (Selected is null || _portraitPath is null)
+            return;
+        var index = Selected.Index;
+        try
+        {
+            if (!_portraits.Restore(_portraitPath, index))
+            {
+                Status = "백업이 없습니다 (이 파일은 교체한 적이 없습니다).";
+                return;
+            }
+            RefreshSlot(index);
+            Status = $"{index}번 원본으로 되돌림";
+        }
+        catch (IOException)
+        {
+            Status = "파일이 잠겨 있습니다 (게임 종료 후 다시 시도).";
+        }
+        catch (Exception ex)
+        {
+            Status = $"되돌리기 실패: {ex.Message}";
+        }
+    }
+
+    /// <summary>교체/복원 후 해당 인덱스의 미리보기·썸네일만 갱신한다.</summary>
+    private void RefreshSlot(int index)
+    {
+        FullImage = _portraits.DecodeFull(_portraitPath!, index);
+        var refreshed = _portraits.LoadOne(_portraitPath!, index);
+        var old = Selected;
+        var slot = old is null ? -1 : Portraits.IndexOf(old);
+        if (slot >= 0)
+        {
+            Portraits[slot] = refreshed;
+            Selected = refreshed;
         }
     }
 }

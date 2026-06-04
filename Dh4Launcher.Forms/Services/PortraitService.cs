@@ -70,22 +70,53 @@ public class PortraitService : IPortraitService
         return list;
     }
 
+    private static PortraitItem MakeItem(byte[] d, TexInfo t, int thumbWidth)
+    {
+        var full = DecodeToBitmap(d, t);
+        double s = thumbWidth / (double)t.Width;
+        var scaled = new TransformedBitmap(full, new ScaleTransform(s, s));
+        // 픽셀을 복사해 독립 비트맵으로 굽는다(원본 풀해상도 디코드는 즉시 GC 가능 — 1080p 컷신 50장 메모리 방지).
+        var thumb = new WriteableBitmap(scaled);
+        thumb.Freeze();
+        return new PortraitItem(t.Index, t.Width, t.Height, thumb);
+    }
+
     public IReadOnlyList<PortraitItem> Load(string portraitPath, int thumbWidth = 110)
     {
         var d = File.ReadAllBytes(portraitPath);
         var infos = Parse(d);
         var items = new List<PortraitItem>(infos.Count);
         foreach (var t in infos)
-        {
-            var full = DecodeToBitmap(d, t);
-            double s = thumbWidth / (double)t.Width;
-            var scaled = new TransformedBitmap(full, new ScaleTransform(s, s));
-            // 픽셀을 복사해 독립 비트맵으로 굽는다(원본 풀해상도 디코드는 즉시 GC 가능 — 1080p 컷신 50장 메모리 방지).
-            var thumb = new WriteableBitmap(scaled);
-            thumb.Freeze();
-            items.Add(new PortraitItem(t.Index, t.Width, t.Height, thumb));
-        }
+            items.Add(MakeItem(d, t, thumbWidth));
         return items;
+    }
+
+    public PortraitItem LoadOne(string portraitPath, int index, int thumbWidth = 110)
+    {
+        var d = File.ReadAllBytes(portraitPath);
+        var t = Parse(d)[index];
+        return MakeItem(d, t, thumbWidth);
+    }
+
+    public bool HasBackup(string portraitPath) => File.Exists(portraitPath + ".bak");
+
+    public bool Restore(string portraitPath, int index)
+    {
+        var bak = portraitPath + ".bak";
+        if (!File.Exists(bak))
+            return false;
+
+        var orig = File.ReadAllBytes(bak);
+        var live = File.ReadAllBytes(portraitPath);
+        var to = Parse(orig)[index];
+        var tl = Parse(live)[index];
+        if (to.DataLen != tl.DataLen)
+            throw new InvalidOperationException("백업과 텍스처 크기가 다릅니다.");
+
+        // 원본 바이트를 그대로 복사 → 재인코딩 손실 없는 정확 복원.
+        Array.Copy(orig, to.DataOffset, live, tl.DataOffset, tl.DataLen);
+        File.WriteAllBytes(portraitPath, live);
+        return true;
     }
 
     public BitmapSource DecodeFull(string portraitPath, int index)

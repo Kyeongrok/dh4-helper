@@ -496,6 +496,13 @@
                                             Height="34"
                                             Margin="0,6,0,0"
                                             MinWidth="0"
+                                            Command="{Binding Portrait.RestoreCommand}"
+                                            Content="원본으로 되돌리기"
+                                            FontSize="12" />
+                                        <support:GameFrameButton
+                                            Height="34"
+                                            Margin="0,6,0,0"
+                                            MinWidth="0"
                                             Command="{Binding Portrait.ExportCommand}"
                                             Content="PNG 내보내기"
                                             FontSize="12" />
@@ -567,6 +574,13 @@
                                             Command="{Binding Cutscene.ReplaceCommand}"
                                             Content="이미지로 교체"
                                             FontSize="13" />
+                                        <support:GameFrameButton
+                                            Height="34"
+                                            Margin="0,6,0,0"
+                                            MinWidth="0"
+                                            Command="{Binding Cutscene.RestoreCommand}"
+                                            Content="원본으로 되돌리기"
+                                            FontSize="12" />
                                         <support:GameFrameButton
                                             Height="34"
                                             Margin="0,6,0,0"
