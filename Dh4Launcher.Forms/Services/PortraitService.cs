@@ -31,6 +31,22 @@ public class PortraitService : IPortraitService
         return list;
     }
 
+    public IReadOnlyList<PortraitFile> FindCutsceneFiles(string? gameDirectory)
+    {
+        var list = new List<PortraitFile>();
+        if (string.IsNullOrEmpty(gameDirectory))
+            return list;
+        void Add(string file, string display)
+        {
+            var p = Path.Combine(gameDirectory, file);
+            if (File.Exists(p)) list.Add(new PortraitFile(display, p));
+        }
+        for (int i = 1; i <= 8; i++)
+            Add($"EventBG{i}.dk4", $"이벤트 CG {i} (EventBG{i})");
+        Add("EventBGEX.dk4", "이벤트 CG 추가 (EventBGEX)");
+        return list;
+    }
+
     // 포맷 코드: 0x59 = BC1(DXT1, 4bpp), 0x5B = BC3(DXT5, 8bpp)
     private record TexInfo(int Index, long DataOffset, int Width, int Height, byte Format, int DataLen);
 
@@ -63,7 +79,9 @@ public class PortraitService : IPortraitService
         {
             var full = DecodeToBitmap(d, t);
             double s = thumbWidth / (double)t.Width;
-            var thumb = new TransformedBitmap(full, new ScaleTransform(s, s));
+            var scaled = new TransformedBitmap(full, new ScaleTransform(s, s));
+            // 픽셀을 복사해 독립 비트맵으로 굽는다(원본 풀해상도 디코드는 즉시 GC 가능 — 1080p 컷신 50장 메모리 방지).
+            var thumb = new WriteableBitmap(scaled);
             thumb.Freeze();
             items.Add(new PortraitItem(t.Index, t.Width, t.Height, thumb));
         }

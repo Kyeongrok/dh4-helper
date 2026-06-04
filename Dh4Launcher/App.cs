@@ -47,6 +47,7 @@ public class App : Application
         services.AddSingleton<IUpdateService, UpdateService>();
         services.AddSingleton<IPortraitService, PortraitService>();
         services.AddSingleton<PortraitViewModel>();
+        services.AddSingleton<CutsceneViewModel>();
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<MainWindow>();
     }

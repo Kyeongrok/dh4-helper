@@ -16,6 +16,9 @@ public interface IPortraitService
     /// <summary>게임 폴더의 편집 가능한 초상화 파일들(bustup/Portrait).</summary>
     IReadOnlyList<PortraitFile> FindFiles(string? gameDirectory);
 
+    /// <summary>게임 폴더의 이벤트 컷신 CG 파일들(EventBG1~8 / EventBGEX).</summary>
+    IReadOnlyList<PortraitFile> FindCutsceneFiles(string? gameDirectory);
+
     /// <summary>모든 초상화를 디코드해 썸네일 목록을 만든다.</summary>
     IReadOnlyList<PortraitItem> Load(string portraitPath, int thumbWidth = 110);
 

@@ -10,8 +10,8 @@ namespace Dh4Launcher.Forms.ViewModels;
 
 public partial class PortraitViewModel : ObservableObject
 {
-    private readonly IPortraitService _portraits;
-    private readonly IGameLauncherService _launcher;
+    protected readonly IPortraitService _portraits;
+    protected readonly IGameLauncherService _launcher;
     private bool _loaded;
     private string? _portraitPath;
 
@@ -40,7 +40,15 @@ public partial class PortraitViewModel : ObservableObject
         _launcher = launcher;
     }
 
-    /// <summary>초상화 탭이 처음 열릴 때 호출 — 파일 목록 채우고 첫 파일 로드.</summary>
+    /// <summary>편집할 파일 목록 — 파생 VM에서 컷신 등 다른 대상으로 교체 가능.</summary>
+    protected virtual IReadOnlyList<PortraitFile> DiscoverFiles()
+        => _portraits.FindFiles(_launcher.GameDirectory);
+
+    /// <summary>대상 파일을 못 찾았을 때 표시할 안내.</summary>
+    protected virtual string NotFoundMessage
+        => "초상화 파일(bustup.dk4 / Portrait.dk4)을 찾을 수 없습니다. (게임 폴더 지정/실행 필요)";
+
+    /// <summary>탭이 처음 열릴 때 호출 — 파일 목록 채우고 첫 파일 로드.</summary>
     public void EnsureLoaded()
     {
         if (_loaded)
@@ -48,12 +56,12 @@ public partial class PortraitViewModel : ObservableObject
         _loaded = true;
 
         Files.Clear();
-        foreach (var f in _portraits.FindFiles(_launcher.GameDirectory))
+        foreach (var f in DiscoverFiles())
             Files.Add(f);
 
         if (Files.Count == 0)
         {
-            Status = "초상화 파일(bustup.dk4 / Portrait.dk4)을 찾을 수 없습니다. (게임 폴더 지정/실행 필요)";
+            Status = NotFoundMessage;
             return;
         }
         SelectedFile = Files[0]; // 변경 핸들러가 로드
