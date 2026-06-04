@@ -95,6 +95,7 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
 
                                 <!--  탭 바  -->
@@ -250,24 +251,6 @@
                                             FontSize="13" />
                                     </StackPanel>
 
-                                    <support:GameFrameButton
-                                        Width="220"
-                                        Height="54"
-                                        Margin="0,24,0,0"
-                                        Command="{Binding LaunchCommand}"
-                                        Content="게임 실행" />
-                                    <TextBlock
-                                        Margin="0,16,0,0"
-                                        HorizontalAlignment="Center"
-                                        FontSize="12"
-                                        Foreground="#6FCF6F"
-                                        Text="{Binding StatusMessage}" />
-                                    <TextBlock
-                                        Margin="0,4,0,0"
-                                        HorizontalAlignment="Center"
-                                        FontSize="11"
-                                        Foreground="#E0B45C"
-                                        Text="{Binding UpdateStatus}" />
                                     </StackPanel>
 
                                     <!--  ===== 오른쪽: 키매핑 =====  -->
@@ -590,6 +573,40 @@
                                             FontSize="12" />
                                     </StackPanel>
                                 </Grid>
+
+                                <!--  ===== 하단 고정 바: 게임 실행 (모든 탭 공통) =====  -->
+                                <Border
+                                    Grid.Row="2"
+                                    Background="#3E2C1A"
+                                    BorderBrush="#241809"
+                                    BorderThickness="0,1,0,0">
+                                    <Grid Margin="12,8">
+                                        <StackPanel
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            MaxWidth="150">
+                                            <TextBlock
+                                                FontSize="12"
+                                                Foreground="#6FCF6F"
+                                                Text="{Binding StatusMessage}"
+                                                TextTrimming="CharacterEllipsis"
+                                                ToolTip="{Binding StatusMessage}" />
+                                            <TextBlock
+                                                Margin="0,2,0,0"
+                                                FontSize="11"
+                                                Foreground="#E0B45C"
+                                                Text="{Binding UpdateStatus}"
+                                                TextTrimming="CharacterEllipsis"
+                                                ToolTip="{Binding UpdateStatus}" />
+                                        </StackPanel>
+                                        <support:GameFrameButton
+                                            Width="220"
+                                            Height="48"
+                                            HorizontalAlignment="Center"
+                                            Command="{Binding LaunchCommand}"
+                                            Content="게임 실행" />
+                                    </Grid>
+                                </Border>
                             </Grid>
                         </Grid>
                         </Border>
