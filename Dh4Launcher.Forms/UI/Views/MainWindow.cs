@@ -47,72 +47,70 @@ public class MainWindow : Dh4LauncherWindow
         WireMapEditor();
     }
 
-    /// <summary>지도 편집기: 이미지 위 마우스로 타일 칠하기 + 바로가기 스크롤.</summary>
+    /// <summary>지도 편집기: 뷰포트 타일 렌더링 + 마우스 칠하기/팬/줌.</summary>
     private void WireMapEditor()
     {
         var image = GetTemplateChild("PART_MapImage") as Image;
-        var scroll = GetTemplateChild("PART_MapScroll") as ScrollViewer;
-        if (image is null || scroll is null)
+        var host = GetTemplateChild("PART_MapHost") as FrameworkElement;
+        if (image is null || host is null)
             return;
 
         WorldMapViewModel? Map() => (DataContext as MainWindowViewModel)?.Map;
 
-        (int x, int y) Tile(MouseEventArgs e)
-        {
-            var p = e.GetPosition(image); // 이미지 로컬 좌표(줌 무관) = 타일 좌표
-            return ((int)p.X, (int)p.Y);
-        }
+        // 캔버스 크기 = 호스트 크기
+        host.SizeChanged += (s, e) =>
+            Map()?.SetViewport((int)host.ActualWidth, (int)host.ActualHeight);
+
+        Point lastPan = default;
 
         image.MouseLeftButtonDown += (s, e) =>
         {
-            var (x, y) = Tile(e);
-            Map()?.PaintAt(x, y);
+            var p = e.GetPosition(image);
+            Map()?.PaintAtScreen(p.X, p.Y);
             image.CaptureMouse();
         };
         image.MouseLeftButtonUp += (s, e) => image.ReleaseMouseCapture();
+
+        image.MouseRightButtonDown += (s, e) =>
+        {
+            lastPan = e.GetPosition(image);
+            image.CaptureMouse();
+        };
+        image.MouseRightButtonUp += (s, e) => image.ReleaseMouseCapture();
+
         image.MouseMove += (s, e) =>
         {
-            var (x, y) = Tile(e);
             var map = Map();
             if (map is null)
                 return;
-            map.HoverAt(x, y);
+            var p = e.GetPosition(image);
+            map.HoverAtScreen(p.X, p.Y);
+
             if (e.LeftButton == MouseButtonState.Pressed)
-                map.PaintAt(x, y);
+                map.PaintAtScreen(p.X, p.Y);
+            else if (e.RightButton == MouseButtonState.Pressed)
+            {
+                map.PanByPixels(p.X - lastPan.X, p.Y - lastPan.Y);
+                lastPan = p;
+            }
         };
 
-        var map = Map();
-        if (map is not null)
-            map.JumpRequested += (tx, ty) =>
-            {
-                double z = map.Zoom;
-                scroll.ScrollToHorizontalOffset(tx * z - scroll.ViewportWidth / 2);
-                scroll.ScrollToVerticalOffset(ty * z - scroll.ViewportHeight / 2);
-            };
-
-        // Ctrl + 휠 = 확대/축소(커서 위치 기준). Ctrl 없으면 일반 스크롤.
-        scroll.PreviewMouseWheel += (s, e) =>
+        // Ctrl+휠 = 커서 기준 확대/축소, Shift+휠 = 가로 이동, 그냥 휠 = 세로 이동
+        host.PreviewMouseWheel += (s, e) =>
         {
-            if ((Keyboard.Modifiers & ModifierKeys.Control) == 0)
+            var map = Map();
+            if (map is null)
                 return;
             e.Handled = true;
-            var m = Map();
-            if (m is null)
-                return;
-
-            var tile = e.GetPosition(image);      // 이미지 로컬 = 타일 좌표(줌 무관)
-            var vp = e.GetPosition(scroll);        // 뷰포트 내 커서 위치(px)
-            double old = m.Zoom;
-            if (e.Delta > 0)
-                m.ZoomInCommand.Execute(null);
+            if ((Keyboard.Modifiers & ModifierKeys.Control) != 0)
+            {
+                var p = e.GetPosition(image);
+                map.ZoomAtCursor(e.Delta, p.X, p.Y);
+            }
             else
-                m.ZoomOutCommand.Execute(null);
-            if (m.Zoom == old)
-                return;
-
-            scroll.UpdateLayout(); // 새 줌으로 콘텐츠 크기 갱신 후 오프셋 설정
-            scroll.ScrollToHorizontalOffset(tile.X * m.Zoom - vp.X);
-            scroll.ScrollToVerticalOffset(tile.Y * m.Zoom - vp.Y);
+            {
+                map.WheelPan(e.Delta, (Keyboard.Modifiers & ModifierKeys.Shift) != 0);
+            }
         };
     }
 }

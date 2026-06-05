@@ -601,27 +601,22 @@
                                         <ColumnDefinition Width="150" />
                                     </Grid.ColumnDefinitions>
 
-                                    <!--  지도 캔버스 (스크롤 + 줌)  -->
+                                    <!--  지도 캔버스 (뷰포트 타일 렌더링 · 드래그 팬 · Ctrl+휠 줌)  -->
                                     <Border
+                                        x:Name="PART_MapHost"
                                         Grid.Column="0"
                                         Background="#22000000"
                                         BorderBrush="#241809"
-                                        BorderThickness="1">
-                                        <ScrollViewer
-                                            x:Name="PART_MapScroll"
-                                            HorizontalScrollBarVisibility="Auto"
-                                            VerticalScrollBarVisibility="Auto">
-                                            <Image
-                                                x:Name="PART_MapImage"
-                                                RenderOptions.BitmapScalingMode="NearestNeighbor"
-                                                RenderOptions.EdgeMode="Aliased"
-                                                Source="{Binding Map.Bitmap}"
-                                                Stretch="None">
-                                                <Image.LayoutTransform>
-                                                    <ScaleTransform ScaleX="{Binding Map.Zoom}" ScaleY="{Binding Map.Zoom}" />
-                                                </Image.LayoutTransform>
-                                            </Image>
-                                        </ScrollViewer>
+                                        BorderThickness="1"
+                                        ClipToBounds="True">
+                                        <Image
+                                            x:Name="PART_MapImage"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Top"
+                                            RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                            RenderOptions.EdgeMode="Aliased"
+                                            Source="{Binding Map.Bitmap}"
+                                            Stretch="None" />
                                     </Border>
 
                                     <!--  편집 컨트롤  -->

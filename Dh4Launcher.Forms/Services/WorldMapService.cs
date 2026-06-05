@@ -1,17 +1,16 @@
 using System.IO;
-using System.Windows;
-using System.Windows.Media.Imaging;
 
 namespace Dh4Launcher.Forms.Services;
 
 /// <summary>
 /// World.dat(2500x2500, 1바이트/타일 세계지도)을 읽고 타일 단위로 편집한다.
-/// 값 의미(추정): 0=깊은 바다, 1~31=바다/얕은바다, 32 이상=해안선/육지.
+/// 각 값은 Chip.DK4 타일 아틀라스(64x64 타일 256개)의 타일 번호 → 실제 게임 타일로 렌더링한다.
 /// 운하 뚫기 = 육지/해안 타일을 바다 타일(예: 0)로 바꿔 항로를 잇는 것.
 /// </summary>
 public class WorldMapService : IWorldMapService
 {
     public int Size => 2500;
+    public int TileSrc => 64;
     private int W => Size;
 
     // 값(타일 번호) -> 색(0xAARRGGBB). Chip.DK4 타일 아틀라스(64x64 타일 256개)의 타일별 평균색.
@@ -53,22 +52,65 @@ public class WorldMapService : IWorldMapService
         return d;
     }
 
-    public WriteableBitmap CreateBitmap(byte[] data)
+    public int[][] LoadTiles(string? gameDirectory)
     {
-        var bmp = new WriteableBitmap(W, W, 96, 96, System.Windows.Media.PixelFormats.Bgra32, null);
-        var px = new int[W * W];
-        for (int i = 0; i < px.Length; i++)
-            px[i] = Lut[data[i]];
-        bmp.WritePixels(new Int32Rect(0, 0, W, W), px, W * 4, 0);
-        return bmp;
+        byte[]? atlas = null;
+        int aw = 0, ah = 0;
+        try
+        {
+            if (!string.IsNullOrEmpty(gameDirectory))
+            {
+                var chip = Path.Combine(gameDirectory, "Chip.DK4");
+                if (File.Exists(chip))
+                    (atlas, aw, ah) = DecodeChipAtlas(File.ReadAllBytes(chip));
+            }
+        }
+        catch { atlas = null; }
+
+        int cols = atlas != null ? aw / TileSrc : 0;
+        var tiles = new int[256][];
+        for (int v = 0; v < 256; v++)
+        {
+            var t = new int[TileSrc * TileSrc];
+            if (atlas != null && cols > 0 && v / cols < ah / TileSrc)
+            {
+                int ax = (v % cols) * TileSrc, ay = (v / cols) * TileSrc;
+                for (int y = 0; y < TileSrc; y++)
+                {
+                    int srcRow = ((ay + y) * aw + ax) * 4;
+                    for (int x = 0; x < TileSrc; x++)
+                    {
+                        int si = srcRow + x * 4;
+                        // DecodeBc3 = BGRA 순서 → 0xAARRGGBB 패킹
+                        t[y * TileSrc + x] = (atlas[si + 3] << 24) | (atlas[si + 2] << 16) | (atlas[si + 1] << 8) | atlas[si];
+                    }
+                }
+            }
+            else
+            {
+                int c = Lut[v]; // 아틀라스 없으면 평균색 단색 타일
+                for (int i = 0; i < t.Length; i++) t[i] = c;
+            }
+            tiles[v] = t;
+        }
+        return tiles;
     }
 
-    public void PaintTile(WriteableBitmap bmp, byte[] data, int x, int y, byte value)
+    /// <summary>Chip.DK4의 tex0(타일 아틀라스, BC3)을 디코드해 (BGRA, w, h) 반환.</summary>
+    private static (byte[] bgra, int w, int h) DecodeChipAtlas(byte[] d)
     {
-        if (x < 0 || y < 0 || x >= W || y >= W)
-            return;
-        data[y * W + x] = value;
-        bmp.WritePixels(new Int32Rect(x, y, 1, 1), new[] { Lut[value] }, 4, 0);
+        if (d.Length < 0x14 || d[0] != (byte)'G' || d[1] != (byte)'T' || d[2] != (byte)'1' || d[3] != (byte)'G')
+            throw new InvalidDataException("Chip.DK4가 G1T가 아닙니다.");
+        uint tableOff = BitConverter.ToUInt32(d, 0x0C);
+        uint off0 = BitConverter.ToUInt32(d, (int)tableOff);
+        int tb = (int)(tableOff + off0);
+        byte dim = d[tb + 2];                 // 하위 니블=width 지수, 상위 니블=height 지수
+        int w = 1 << (dim & 0xF);             // 512
+        int h = 1 << ((dim >> 4) & 0xF);      // 2048
+        int dataOff = tb + 0x14;              // 텍스처 헤더 20바이트
+        var block = new byte[w * h];          // BC3 = w*h 바이트
+        Array.Copy(d, dataOff, block, 0, block.Length);
+        return (Dxt.DecodeBc3(block, w, h), w, h);
     }
 
     public void Save(string path, byte[] data)
