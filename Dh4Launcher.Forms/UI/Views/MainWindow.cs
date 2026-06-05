@@ -89,5 +89,30 @@ public class MainWindow : Dh4LauncherWindow
                 scroll.ScrollToHorizontalOffset(tx * z - scroll.ViewportWidth / 2);
                 scroll.ScrollToVerticalOffset(ty * z - scroll.ViewportHeight / 2);
             };
+
+        // Ctrl + 휠 = 확대/축소(커서 위치 기준). Ctrl 없으면 일반 스크롤.
+        scroll.PreviewMouseWheel += (s, e) =>
+        {
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == 0)
+                return;
+            e.Handled = true;
+            var m = Map();
+            if (m is null)
+                return;
+
+            var tile = e.GetPosition(image);      // 이미지 로컬 = 타일 좌표(줌 무관)
+            var vp = e.GetPosition(scroll);        // 뷰포트 내 커서 위치(px)
+            double old = m.Zoom;
+            if (e.Delta > 0)
+                m.ZoomInCommand.Execute(null);
+            else
+                m.ZoomOutCommand.Execute(null);
+            if (m.Zoom == old)
+                return;
+
+            scroll.UpdateLayout(); // 새 줌으로 콘텐츠 크기 갱신 후 오프셋 설정
+            scroll.ScrollToHorizontalOffset(tile.X * m.Zoom - vp.X);
+            scroll.ScrollToVerticalOffset(tile.Y * m.Zoom - vp.Y);
+        };
     }
 }

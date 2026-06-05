@@ -725,6 +725,13 @@
                                             Height="30"
                                             Margin="0,4,0,0"
                                             MinWidth="0"
+                                            Command="{Binding Map.ResetCommand}"
+                                            Content="초기화"
+                                            FontSize="12" />
+                                        <support:GameFrameButton
+                                            Height="30"
+                                            Margin="0,4,0,0"
+                                            MinWidth="0"
                                             Command="{Binding Map.RestoreCommand}"
                                             Content="원본 복원"
                                             FontSize="12" />

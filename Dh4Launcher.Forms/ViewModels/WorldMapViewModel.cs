@@ -174,6 +174,23 @@ public partial class WorldMapViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    private void Reset()
+    {
+        if (_path is null || _data is null)
+            return;
+        try
+        {
+            _data = _svc.Load(_path); // 현재 저장된 World.dat에서 다시 로드 → 저장 안 한 편집 취소
+            Bitmap = _svc.CreateBitmap(_data);
+            Status = "편집 취소 — 현재 저장 상태로 초기화";
+        }
+        catch (Exception ex)
+        {
+            Status = $"초기화 실패: {ex.Message}";
+        }
+    }
+
     private bool CanRestore() => _path is not null && _svc.HasBackup(_path);
 
     [RelayCommand(CanExecute = nameof(CanRestore))]
