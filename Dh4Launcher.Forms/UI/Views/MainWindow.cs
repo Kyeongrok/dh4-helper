@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Dh4Launcher.Forms.ViewModels;
 using Dh4Launcher.Support.UI.Units;
 
@@ -42,5 +43,51 @@ public class MainWindow : Dh4LauncherWindow
         var closeButton = GetTemplateChild("PART_CloseButton") as Button;
         if (closeButton != null)
             closeButton.Click += (s, e) => Close();
+
+        WireMapEditor();
+    }
+
+    /// <summary>지도 편집기: 이미지 위 마우스로 타일 칠하기 + 바로가기 스크롤.</summary>
+    private void WireMapEditor()
+    {
+        var image = GetTemplateChild("PART_MapImage") as Image;
+        var scroll = GetTemplateChild("PART_MapScroll") as ScrollViewer;
+        if (image is null || scroll is null)
+            return;
+
+        WorldMapViewModel? Map() => (DataContext as MainWindowViewModel)?.Map;
+
+        (int x, int y) Tile(MouseEventArgs e)
+        {
+            var p = e.GetPosition(image); // 이미지 로컬 좌표(줌 무관) = 타일 좌표
+            return ((int)p.X, (int)p.Y);
+        }
+
+        image.MouseLeftButtonDown += (s, e) =>
+        {
+            var (x, y) = Tile(e);
+            Map()?.PaintAt(x, y);
+            image.CaptureMouse();
+        };
+        image.MouseLeftButtonUp += (s, e) => image.ReleaseMouseCapture();
+        image.MouseMove += (s, e) =>
+        {
+            var (x, y) = Tile(e);
+            var map = Map();
+            if (map is null)
+                return;
+            map.HoverAt(x, y);
+            if (e.LeftButton == MouseButtonState.Pressed)
+                map.PaintAt(x, y);
+        };
+
+        var map = Map();
+        if (map is not null)
+            map.JumpRequested += (tx, ty) =>
+            {
+                double z = map.Zoom;
+                scroll.ScrollToHorizontalOffset(tx * z - scroll.ViewportWidth / 2);
+                scroll.ScrollToVerticalOffset(ty * z - scroll.ViewportHeight / 2);
+            };
     }
 }

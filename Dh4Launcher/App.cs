@@ -46,8 +46,10 @@ public class App : Application
         services.AddSingleton<IKeyMappingService, KeyMappingService>();
         services.AddSingleton<IUpdateService, UpdateService>();
         services.AddSingleton<IPortraitService, PortraitService>();
+        services.AddSingleton<IWorldMapService, WorldMapService>();
         services.AddSingleton<PortraitViewModel>();
         services.AddSingleton<CutsceneViewModel>();
+        services.AddSingleton<WorldMapViewModel>();
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<MainWindow>();
     }

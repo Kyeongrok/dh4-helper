@@ -153,6 +153,23 @@
                                             </Style>
                                         </support:GameTabButton.Style>
                                     </support:GameTabButton>
+                                    <support:GameTabButton
+                                        Width="96"
+                                        Margin="8,0,0,0"
+                                        Command="{Binding SelectTabCommand}"
+                                        CommandParameter="3"
+                                        Content="지도">
+                                        <support:GameTabButton.Style>
+                                            <Style TargetType="{x:Type support:GameTabButton}">
+                                                <Setter Property="Opacity" Value="0.5" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding SelectedTab}" Value="3">
+                                                        <Setter Property="Opacity" Value="1" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </support:GameTabButton.Style>
+                                    </support:GameTabButton>
                                 </StackPanel>
 
                                 <!--  ===== 탭 0: 설정 =====  -->
@@ -571,6 +588,158 @@
                                             Command="{Binding Cutscene.ExportCommand}"
                                             Content="PNG 내보내기"
                                             FontSize="12" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <!--  ===== 탭 3: 지도 편집기 (World.dat) =====  -->
+                                <Grid
+                                    Grid.Row="1"
+                                    Margin="10,4,10,10"
+                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=3}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="150" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!--  지도 캔버스 (스크롤 + 줌)  -->
+                                    <Border
+                                        Grid.Column="0"
+                                        Background="#22000000"
+                                        BorderBrush="#241809"
+                                        BorderThickness="1">
+                                        <ScrollViewer
+                                            x:Name="PART_MapScroll"
+                                            HorizontalScrollBarVisibility="Auto"
+                                            VerticalScrollBarVisibility="Auto">
+                                            <Image
+                                                x:Name="PART_MapImage"
+                                                RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                                RenderOptions.EdgeMode="Aliased"
+                                                Source="{Binding Map.Bitmap}"
+                                                Stretch="None">
+                                                <Image.LayoutTransform>
+                                                    <ScaleTransform ScaleX="{Binding Map.Zoom}" ScaleY="{Binding Map.Zoom}" />
+                                                </Image.LayoutTransform>
+                                            </Image>
+                                        </ScrollViewer>
+                                    </Border>
+
+                                    <!--  편집 컨트롤  -->
+                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                        <support:GameLabel Margin="0,0,0,4" Content="브러시" />
+                                        <support:GameFrameButton
+                                            Height="32"
+                                            MinWidth="0"
+                                            Command="{Binding Map.SetModeSeaCommand}"
+                                            Content="바다로"
+                                            FontSize="12" />
+                                        <support:GameFrameButton
+                                            Height="32"
+                                            Margin="0,4,0,0"
+                                            MinWidth="0"
+                                            Command="{Binding Map.SetModeLandCommand}"
+                                            Content="육지로"
+                                            FontSize="12" />
+                                        <support:GameFrameButton
+                                            Height="32"
+                                            Margin="0,4,0,0"
+                                            MinWidth="0"
+                                            Command="{Binding Map.SetModeEyedropperCommand}"
+                                            Content="스포이드"
+                                            FontSize="12" />
+                                        <TextBlock
+                                            Margin="0,4,0,0"
+                                            FontSize="11"
+                                            Foreground="#E0B45C"
+                                            Text="{Binding Map.PaintValueText}" />
+
+                                        <support:GameLabel Margin="0,10,0,4" Content="브러시 크기" />
+                                        <StackPanel Orientation="Horizontal">
+                                            <support:GameFrameButton
+                                                Width="44"
+                                                Height="30"
+                                                MinWidth="0"
+                                                Command="{Binding Map.BrushSmallCommand}"
+                                                Content="1"
+                                                FontSize="12" />
+                                            <support:GameFrameButton
+                                                Width="44"
+                                                Height="30"
+                                                Margin="4,0,0,0"
+                                                MinWidth="0"
+                                                Command="{Binding Map.BrushMediumCommand}"
+                                                Content="3"
+                                                FontSize="12" />
+                                            <support:GameFrameButton
+                                                Width="44"
+                                                Height="30"
+                                                Margin="4,0,0,0"
+                                                MinWidth="0"
+                                                Command="{Binding Map.BrushLargeCommand}"
+                                                Content="7"
+                                                FontSize="12" />
+                                        </StackPanel>
+
+                                        <support:GameLabel Margin="0,10,0,4" Content="확대" />
+                                        <StackPanel Orientation="Horizontal">
+                                            <support:GameFrameButton
+                                                Width="67"
+                                                Height="30"
+                                                MinWidth="0"
+                                                Command="{Binding Map.ZoomOutCommand}"
+                                                Content="−"
+                                                FontSize="14" />
+                                            <support:GameFrameButton
+                                                Width="67"
+                                                Height="30"
+                                                Margin="4,0,0,0"
+                                                MinWidth="0"
+                                                Command="{Binding Map.ZoomInCommand}"
+                                                Content="+"
+                                                FontSize="14" />
+                                        </StackPanel>
+
+                                        <support:GameLabel Margin="0,10,0,4" Content="바로가기" />
+                                        <support:GameFrameButton
+                                            Height="30"
+                                            MinWidth="0"
+                                            Command="{Binding Map.JumpSuezCommand}"
+                                            Content="수에즈"
+                                            FontSize="12" />
+                                        <support:GameFrameButton
+                                            Height="30"
+                                            Margin="0,4,0,0"
+                                            MinWidth="0"
+                                            Command="{Binding Map.JumpPanamaCommand}"
+                                            Content="파나마"
+                                            FontSize="12" />
+
+                                        <support:GameFrameButton
+                                            Height="34"
+                                            Margin="0,12,0,0"
+                                            MinWidth="0"
+                                            Command="{Binding Map.SaveCommand}"
+                                            Content="저장"
+                                            FontSize="13" />
+                                        <support:GameFrameButton
+                                            Height="30"
+                                            Margin="0,4,0,0"
+                                            MinWidth="0"
+                                            Command="{Binding Map.RestoreCommand}"
+                                            Content="원본 복원"
+                                            FontSize="12" />
+
+                                        <TextBlock
+                                            Margin="0,8,0,0"
+                                            FontSize="11"
+                                            Foreground="#BBBBBB"
+                                            Text="{Binding Map.CursorText}" />
+                                        <TextBlock
+                                            Margin="0,4,0,0"
+                                            FontSize="11"
+                                            Foreground="#DDDDDD"
+                                            Text="{Binding Map.Status}"
+                                            TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Grid>
 
