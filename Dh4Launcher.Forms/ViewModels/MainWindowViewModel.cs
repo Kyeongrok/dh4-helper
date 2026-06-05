@@ -54,7 +54,7 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private string _statusMessage = string.Empty;
 
-    /// <summary>0 = 설정, 1 = 초상화, 2 = 컷신, 3 = 지도.</summary>
+    /// <summary>0 = 설정, 1 = 초상화, 2 = 컷신, 3 = 지도, 4 = 도시.</summary>
     [ObservableProperty]
     private int _selectedTab;
 
@@ -64,6 +64,8 @@ public partial class MainWindowViewModel : ObservableObject
 
     public WorldMapViewModel Map { get; }
 
+    public TownViewModel Town { get; }
+
     partial void OnSelectedTabChanged(int value)
     {
         if (value == 1)
@@ -72,6 +74,8 @@ public partial class MainWindowViewModel : ObservableObject
             Cutscene.EnsureLoaded();
         else if (value == 3)
             Map.EnsureLoaded();
+        else if (value == 4)
+            Town.EnsureLoaded();
     }
 
     [RelayCommand]
@@ -136,7 +140,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     public MainWindowViewModel(IGameSettingsService settings, IGameLauncherService launcher,
         IGpuService gpu, IKeyMappingService keymap, IUpdateService updates,
-        PortraitViewModel portrait, CutsceneViewModel cutscene, WorldMapViewModel map)
+        PortraitViewModel portrait, CutsceneViewModel cutscene, WorldMapViewModel map, TownViewModel town)
     {
         _settings = settings;
         _launcher = launcher;
@@ -146,6 +150,7 @@ public partial class MainWindowViewModel : ObservableObject
         Portrait = portrait;
         Cutscene = cutscene;
         Map = map;
+        Town = town;
         _gpuName = _gpu.HighPerformanceGpuName;
 
         SelectedLanguage = Languages.First(l => l.Language == GameLanguage.Korean);

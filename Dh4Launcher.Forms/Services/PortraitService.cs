@@ -47,7 +47,24 @@ public class PortraitService : IPortraitService
         return list;
     }
 
-    // 포맷 코드: 0x59 = BC1(DXT1, 4bpp), 0x5B = BC3(DXT5, 8bpp)
+    public IReadOnlyList<PortraitFile> FindTownFiles(string? gameDirectory)
+    {
+        var list = new List<PortraitFile>();
+        if (string.IsNullOrEmpty(gameDirectory))
+            return list;
+        void Add(string file, string display)
+        {
+            var p = Path.Combine(gameDirectory, file);
+            if (File.Exists(p)) list.Add(new PortraitFile(display, p));
+        }
+        Add("TownGrp.DK4", "도시/항구 배경 (TownGrp)");
+        Add("Plaza.dk4", "항구 광장 (Plaza)");
+        Add("DeckScrn.dk4", "갑판 화면 (DeckScrn)");
+        Add("DeckShip.dk4", "갑판 배 (DeckShip)");
+        return list;
+    }
+
+    // 포맷 코드: 0x01 = 비압축 32비트 RGBA, 0x59 = BC1(DXT1, 4bpp), 0x5B = BC3(DXT5, 8bpp)
     private record TexInfo(int Index, long DataOffset, int Width, int Height, byte Format, int DataLen);
 
     private static List<TexInfo> Parse(byte[] d)
@@ -64,7 +81,12 @@ public class PortraitService : IPortraitService
             byte fmt = d[texBase + 1];
             int w = (int)BitConverter.ToUInt32(d, (int)texBase + 0x14);
             int h = (int)BitConverter.ToUInt32(d, (int)texBase + 0x18);
-            int dataLen = fmt == 0x59 ? w * h / 2 : w * h; // BC1=4bpp, BC3=8bpp
+            int dataLen = fmt switch
+            {
+                0x01 => w * h * 4, // 비압축 RGBA
+                0x59 => w * h / 2, // BC1
+                _ => w * h,        // BC3
+            };
             list.Add(new TexInfo(i, texBase + TexHeaderSize, w, h, fmt, dataLen));
         }
         return list;
@@ -130,9 +152,12 @@ public class PortraitService : IPortraitService
     {
         var block = new byte[t.DataLen];
         Array.Copy(d, t.DataOffset, block, 0, block.Length);
-        var bgra = t.Format == 0x59
-            ? Dxt.DecodeBc1(block, t.Width, t.Height)
-            : Dxt.DecodeBc3(block, t.Width, t.Height);
+        var bgra = t.Format switch
+        {
+            0x01 => SwapRb(block), // RGBA -> BGRA
+            0x59 => Dxt.DecodeBc1(block, t.Width, t.Height),
+            _ => Dxt.DecodeBc3(block, t.Width, t.Height),
+        };
         var bmp = BitmapSource.Create(t.Width, t.Height, 96, 96,
             PixelFormats.Bgra32, null, bgra, t.Width * 4);
         bmp.Freeze();
@@ -155,9 +180,12 @@ public class PortraitService : IPortraitService
 
         // 새 이미지 → t.Width x t.Height BGRA32
         var bgra = LoadImageAsBgra(imagePath, t.Width, t.Height);
-        var encoded = t.Format == 0x59
-            ? Dxt.EncodeBc1(bgra, t.Width, t.Height)
-            : Dxt.EncodeBc3(bgra, t.Width, t.Height);
+        var encoded = t.Format switch
+        {
+            0x01 => SwapRb(bgra), // BGRA -> RGBA (스왑은 대칭)
+            0x59 => Dxt.EncodeBc1(bgra, t.Width, t.Height),
+            _ => Dxt.EncodeBc3(bgra, t.Width, t.Height),
+        };
         if (encoded.Length != t.DataLen)
             throw new InvalidOperationException($"인코딩 크기 불일치 ({encoded.Length} != {t.DataLen}).");
 
@@ -181,6 +209,20 @@ public class PortraitService : IPortraitService
 
         Array.Copy(encoded, 0, d, t.DataOffset, t.DataLen);
         File.WriteAllBytes(portraitPath, d);
+    }
+
+    /// <summary>R↔B 채널 스왑(RGBA↔BGRA, 4바이트/픽셀). 대칭이라 양방향 동일.</summary>
+    private static byte[] SwapRb(byte[] src)
+    {
+        var o = new byte[src.Length];
+        for (int i = 0; i + 3 < src.Length; i += 4)
+        {
+            o[i] = src[i + 2];
+            o[i + 1] = src[i + 1];
+            o[i + 2] = src[i];
+            o[i + 3] = src[i + 3];
+        }
+        return o;
     }
 
     private static byte[] LoadImageAsBgra(string imagePath, int w, int h)
