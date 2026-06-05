@@ -51,6 +51,7 @@ public class App : Application
         services.AddSingleton<CutsceneViewModel>();
         services.AddSingleton<WorldMapViewModel>();
         services.AddSingleton<TownViewModel>();
+        services.AddSingleton<BuildingViewModel>();
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<MainWindow>();
     }

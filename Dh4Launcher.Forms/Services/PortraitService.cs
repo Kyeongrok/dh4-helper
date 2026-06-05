@@ -58,9 +58,22 @@ public class PortraitService : IPortraitService
             if (File.Exists(p)) list.Add(new PortraitFile(display, p));
         }
         Add("TownGrp.DK4", "도시/항구 배경 (TownGrp)");
-        Add("Plaza.dk4", "항구 광장 (Plaza)");
         Add("DeckScrn.dk4", "갑판 화면 (DeckScrn)");
         Add("DeckShip.dk4", "갑판 배 (DeckShip)");
+        return list;
+    }
+
+    public IReadOnlyList<PortraitFile> FindBuildingFiles(string? gameDirectory)
+    {
+        var list = new List<PortraitFile>();
+        if (string.IsNullOrEmpty(gameDirectory))
+            return list;
+        void Add(string file, string display)
+        {
+            var p = Path.Combine(gameDirectory, file);
+            if (File.Exists(p)) list.Add(new PortraitFile(display, p));
+        }
+        Add("Plaza.dk4", "건물/상점 (Plaza)");
         return list;
     }
 
@@ -81,19 +94,36 @@ public class PortraitService : IPortraitService
             byte fmt = d[texBase + 1];
             int w = (int)BitConverter.ToUInt32(d, (int)texBase + 0x14);
             int h = (int)BitConverter.ToUInt32(d, (int)texBase + 0x18);
-            int dataLen = fmt switch
+            long dataLenL = fmt switch
             {
-                0x01 => w * h * 4, // 비압축 RGBA
-                0x59 => w * h / 2, // BC1
-                _ => w * h,        // BC3
+                0x01 => (long)w * h * 4, // 비압축 RGBA
+                0x59 => (long)w * h / 2, // BC1
+                _ => (long)w * h,        // BC3
             };
-            list.Add(new TexInfo(i, texBase + TexHeaderSize, w, h, fmt, dataLen));
+            long dataOff = texBase + TexHeaderSize;
+            // 비정상 텍스처(잘못된 크기/범위 초과)는 편집 불가 자리표시자로 둔다(DataLen=0).
+            bool ok = w > 0 && h > 0 && w <= 16384 && h <= 16384 && dataLenL > 0 && dataOff + dataLenL <= d.Length;
+            list.Add(ok
+                ? new TexInfo(i, dataOff, w, h, fmt, (int)dataLenL)
+                : new TexInfo(i, dataOff, 1, 1, fmt, 0));
         }
         return list;
     }
 
+    private static readonly BitmapSource Placeholder = CreatePlaceholder();
+    private static BitmapSource CreatePlaceholder()
+    {
+        var px = new byte[8 * 8 * 4];
+        for (int i = 0; i < px.Length; i += 4) { px[i] = 60; px[i + 1] = 60; px[i + 2] = 70; px[i + 3] = 255; }
+        var b = BitmapSource.Create(8, 8, 96, 96, PixelFormats.Bgra32, null, px, 8 * 4);
+        b.Freeze();
+        return b;
+    }
+
     private static PortraitItem MakeItem(byte[] d, TexInfo t, int thumbWidth)
     {
+        if (t.DataLen <= 0) // 비정상/편집 불가 텍스처
+            return new PortraitItem(t.Index, t.Width, t.Height, Placeholder);
         var full = DecodeToBitmap(d, t);
         double s = thumbWidth / (double)t.Width;
         var scaled = new TransformedBitmap(full, new ScaleTransform(s, s));
@@ -150,6 +180,8 @@ public class PortraitService : IPortraitService
 
     private static BitmapSource DecodeToBitmap(byte[] d, TexInfo t)
     {
+        if (t.DataLen <= 0)
+            return Placeholder;
         var block = new byte[t.DataLen];
         Array.Copy(d, t.DataOffset, block, 0, block.Length);
         var bgra = t.Format switch
@@ -177,6 +209,8 @@ public class PortraitService : IPortraitService
     {
         var d = File.ReadAllBytes(portraitPath);
         var t = Parse(d)[index];
+        if (t.DataLen <= 0)
+            throw new InvalidOperationException("이 텍스처는 편집할 수 없습니다(비정상 크기).");
 
         // 새 이미지 → t.Width x t.Height BGRA32
         var bgra = LoadImageAsBgra(imagePath, t.Width, t.Height);

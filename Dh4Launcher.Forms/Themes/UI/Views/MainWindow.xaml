@@ -104,7 +104,7 @@
                                     Margin="10,8,0,4"
                                     Orientation="Horizontal">
                                     <support:GameTabButton
-                                        Width="96"
+                                        Width="80"
                                         Command="{Binding SelectTabCommand}"
                                         CommandParameter="0"
                                         Content="설정">
@@ -120,7 +120,7 @@
                                         </support:GameTabButton.Style>
                                     </support:GameTabButton>
                                     <support:GameTabButton
-                                        Width="96"
+                                        Width="80"
                                         Margin="8,0,0,0"
                                         Command="{Binding SelectTabCommand}"
                                         CommandParameter="1"
@@ -137,7 +137,7 @@
                                         </support:GameTabButton.Style>
                                     </support:GameTabButton>
                                     <support:GameTabButton
-                                        Width="96"
+                                        Width="80"
                                         Margin="8,0,0,0"
                                         Command="{Binding SelectTabCommand}"
                                         CommandParameter="2"
@@ -154,7 +154,7 @@
                                         </support:GameTabButton.Style>
                                     </support:GameTabButton>
                                     <support:GameTabButton
-                                        Width="96"
+                                        Width="80"
                                         Margin="8,0,0,0"
                                         Command="{Binding SelectTabCommand}"
                                         CommandParameter="3"
@@ -171,7 +171,7 @@
                                         </support:GameTabButton.Style>
                                     </support:GameTabButton>
                                     <support:GameTabButton
-                                        Width="96"
+                                        Width="80"
                                         Margin="8,0,0,0"
                                         Command="{Binding SelectTabCommand}"
                                         CommandParameter="4"
@@ -181,6 +181,23 @@
                                                 <Setter Property="Opacity" Value="0.5" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding SelectedTab}" Value="4">
+                                                        <Setter Property="Opacity" Value="1" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </support:GameTabButton.Style>
+                                    </support:GameTabButton>
+                                    <support:GameTabButton
+                                        Width="80"
+                                        Margin="8,0,0,0"
+                                        Command="{Binding SelectTabCommand}"
+                                        CommandParameter="5"
+                                        Content="건물">
+                                        <support:GameTabButton.Style>
+                                            <Style TargetType="{x:Type support:GameTabButton}">
+                                                <Setter Property="Opacity" Value="0.5" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding SelectedTab}" Value="5">
                                                         <Setter Property="Opacity" Value="1" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -839,6 +856,88 @@
                                             Margin="0,6,0,0"
                                             MinWidth="0"
                                             Command="{Binding Town.ExportCommand}"
+                                            Content="PNG 내보내기"
+                                            FontSize="12" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <!--  ===== 탭 5: 건물/상점 (Plaza) =====  -->
+                                <Grid
+                                    Grid.Row="1"
+                                    Margin="10,4,10,10"
+                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=5}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="190" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!--  갤러리  -->
+                                    <ListBox
+                                        Grid.Column="0"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        ItemsSource="{Binding Building.Portraits}"
+                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                        SelectedItem="{Binding Building.Selected}">
+                                        <ListBox.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel />
+                                            </ItemsPanelTemplate>
+                                        </ListBox.ItemsPanel>
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Width="120" Margin="2">
+                                                    <Image Width="114" Source="{Binding Thumbnail}" />
+                                                    <TextBlock
+                                                        HorizontalAlignment="Center"
+                                                        FontSize="11"
+                                                        Foreground="#EEEEEE"
+                                                        Text="{Binding Index}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+
+                                    <!--  미리보기 + 컨트롤  -->
+                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                        <ComboBox
+                                            Margin="0,0,0,6"
+                                            Padding="8,4"
+                                            DisplayMemberPath="Display"
+                                            FontSize="12"
+                                            ItemsSource="{Binding Building.Files}"
+                                            SelectedItem="{Binding Building.SelectedFile}" />
+                                        <Border Background="#33000000" CornerRadius="4" Padding="4">
+                                            <Image
+                                                Height="180"
+                                                Source="{Binding Building.FullImage}"
+                                                Stretch="Uniform" />
+                                        </Border>
+                                        <TextBlock
+                                            Margin="0,6,0,0"
+                                            FontSize="12"
+                                            Foreground="#DDDDDD"
+                                            Text="{Binding Building.Status}"
+                                            TextWrapping="Wrap" />
+                                        <support:GameFrameButton
+                                            Height="38"
+                                            Margin="0,8,0,0"
+                                            MinWidth="0"
+                                            Command="{Binding Building.ReplaceCommand}"
+                                            Content="이미지로 교체"
+                                            FontSize="13" />
+                                        <support:GameFrameButton
+                                            Height="34"
+                                            Margin="0,6,0,0"
+                                            MinWidth="0"
+                                            Command="{Binding Building.RestoreCommand}"
+                                            Content="원본으로 되돌리기"
+                                            FontSize="12" />
+                                        <support:GameFrameButton
+                                            Height="34"
+                                            Margin="0,6,0,0"
+                                            MinWidth="0"
+                                            Command="{Binding Building.ExportCommand}"
                                             Content="PNG 내보내기"
                                             FontSize="12" />
                                     </StackPanel>

@@ -19,8 +19,11 @@ public interface IPortraitService
     /// <summary>게임 폴더의 이벤트 컷신 CG 파일들(EventBG1~8 / EventBGEX).</summary>
     IReadOnlyList<PortraitFile> FindCutsceneFiles(string? gameDirectory);
 
-    /// <summary>게임 폴더의 도시/항구 배경 파일들(TownGrp / Plaza / Deck*).</summary>
+    /// <summary>게임 폴더의 도시/항구 배경 파일들(TownGrp / Deck*).</summary>
     IReadOnlyList<PortraitFile> FindTownFiles(string? gameDirectory);
+
+    /// <summary>게임 폴더의 건물/상점 파일들(Plaza).</summary>
+    IReadOnlyList<PortraitFile> FindBuildingFiles(string? gameDirectory);
 
     /// <summary>모든 초상화를 디코드해 썸네일 목록을 만든다.</summary>
     IReadOnlyList<PortraitItem> Load(string portraitPath, int thumbWidth = 110);
