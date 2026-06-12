@@ -375,6 +375,61 @@
                                         ItemsSource="{Binding Keys}"
                                         SelectedItem="{Binding MapKey}" />
 
+                                    <!--  기능 키 F2~F5 재매핑  -->
+                                    <support:GameLabel Margin="0,12,0,6" Content="기능 키 (F2~F5)" />
+                                    <StackPanel Width="220" Orientation="Horizontal">
+                                        <StackPanel Width="105">
+                                            <TextBlock
+                                                FontSize="12"
+                                                Foreground="#9A9A9A"
+                                                Text="F2" />
+                                            <ComboBox
+                                                Margin="0,2,0,0"
+                                                Padding="8,4"
+                                                FontSize="13"
+                                                ItemsSource="{Binding Keys}"
+                                                SelectedItem="{Binding F2Key}" />
+                                        </StackPanel>
+                                        <StackPanel Width="105" Margin="10,0,0,0">
+                                            <TextBlock
+                                                FontSize="12"
+                                                Foreground="#9A9A9A"
+                                                Text="F3" />
+                                            <ComboBox
+                                                Margin="0,2,0,0"
+                                                Padding="8,4"
+                                                FontSize="13"
+                                                ItemsSource="{Binding Keys}"
+                                                SelectedItem="{Binding F3Key}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <StackPanel Width="220" Margin="0,6,0,0" Orientation="Horizontal">
+                                        <StackPanel Width="105">
+                                            <TextBlock
+                                                FontSize="12"
+                                                Foreground="#9A9A9A"
+                                                Text="F4" />
+                                            <ComboBox
+                                                Margin="0,2,0,0"
+                                                Padding="8,4"
+                                                FontSize="13"
+                                                ItemsSource="{Binding Keys}"
+                                                SelectedItem="{Binding F4Key}" />
+                                        </StackPanel>
+                                        <StackPanel Width="105" Margin="10,0,0,0">
+                                            <TextBlock
+                                                FontSize="12"
+                                                Foreground="#9A9A9A"
+                                                Text="F5" />
+                                            <ComboBox
+                                                Margin="0,2,0,0"
+                                                Padding="8,4"
+                                                FontSize="13"
+                                                ItemsSource="{Binding Keys}"
+                                                SelectedItem="{Binding F5Key}" />
+                                        </StackPanel>
+                                    </StackPanel>
+
                                     <!--  보조 키 (넘패드 기능 재매핑)  -->
                                     <support:GameLabel Margin="0,12,0,6" Content="보조 키 (넘패드 기능)" />
                                     <StackPanel Width="220" Orientation="Horizontal">

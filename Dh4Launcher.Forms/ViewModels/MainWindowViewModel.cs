@@ -128,6 +128,18 @@ public partial class MainWindowViewModel : ObservableObject
     private KeyOption? _mapKey;
 
     [ObservableProperty]
+    private KeyOption? _f2Key;
+
+    [ObservableProperty]
+    private KeyOption? _f3Key;
+
+    [ObservableProperty]
+    private KeyOption? _f4Key;
+
+    [ObservableProperty]
+    private KeyOption? _f5Key;
+
+    [ObservableProperty]
     private KeyOption? _numPlusKey;
 
     [ObservableProperty]
@@ -236,6 +248,10 @@ public partial class MainWindowViewModel : ObservableObject
                 UpKey = OptionForVk(state.UpVk);
                 DownKey = OptionForVk(state.DownVk);
                 MapKey = OptionForVk(state.MapVk);
+                F2Key = OptionForVk(state.F2Vk);
+                F3Key = OptionForVk(state.F3Vk);
+                F4Key = OptionForVk(state.F4Vk);
+                F5Key = OptionForVk(state.F5Vk);
                 NumPlusKey = OptionForVk(state.NumPlusVk);
                 NumMinusKey = OptionForVk(state.NumMinusVk);
                 Num4Key = OptionForVk(state.Num4Vk);
@@ -254,10 +270,12 @@ public partial class MainWindowViewModel : ObservableObject
     private void ApplyKeyMap()
     {
         if (LeftKey is null || RightKey is null || UpKey is null || DownKey is null || MapKey is null
-            || NumPlusKey is null || NumMinusKey is null || Num4Key is null || Num6Key is null)
+            || NumPlusKey is null || NumMinusKey is null || Num4Key is null || Num6Key is null
+            || F2Key is null || F3Key is null || F4Key is null || F5Key is null)
             return;
         WriteKeyMap(LeftKey.Vk, RightKey.Vk, UpKey.Vk, DownKey.Vk, MapKey.Vk,
-            NumPlusKey.Vk, NumMinusKey.Vk, Num4Key.Vk, Num6Key.Vk);
+            NumPlusKey.Vk, NumMinusKey.Vk, Num4Key.Vk, Num6Key.Vk,
+            F2Key.Vk, F3Key.Vk, F4Key.Vk, F5Key.Vk);
     }
 
     [RelayCommand(CanExecute = nameof(CanEditKeyMap))]
@@ -268,17 +286,23 @@ public partial class MainWindowViewModel : ObservableObject
         UpKey = OptionForVk(_keymap.DefaultUpVk);
         DownKey = OptionForVk(_keymap.DefaultDownVk);
         MapKey = OptionForVk(_keymap.DefaultMapVk);
+        F2Key = OptionForVk(_keymap.DefaultF2Vk);
+        F3Key = OptionForVk(_keymap.DefaultF3Vk);
+        F4Key = OptionForVk(_keymap.DefaultF4Vk);
+        F5Key = OptionForVk(_keymap.DefaultF5Vk);
         NumPlusKey = OptionForVk(_keymap.DefaultNumPlusVk);
         NumMinusKey = OptionForVk(_keymap.DefaultNumMinusVk);
         Num4Key = OptionForVk(_keymap.DefaultNum4Vk);
         Num6Key = OptionForVk(_keymap.DefaultNum6Vk);
         WriteKeyMap(_keymap.DefaultLeftVk, _keymap.DefaultRightVk, _keymap.DefaultUpVk,
             _keymap.DefaultDownVk, _keymap.DefaultMapVk,
-            _keymap.DefaultNumPlusVk, _keymap.DefaultNumMinusVk, _keymap.DefaultNum4Vk, _keymap.DefaultNum6Vk);
+            _keymap.DefaultNumPlusVk, _keymap.DefaultNumMinusVk, _keymap.DefaultNum4Vk, _keymap.DefaultNum6Vk,
+            _keymap.DefaultF2Vk, _keymap.DefaultF3Vk, _keymap.DefaultF4Vk, _keymap.DefaultF5Vk);
     }
 
     private void WriteKeyMap(byte leftVk, byte rightVk, byte upVk, byte downVk, byte mapVk,
-        byte numPlusVk, byte numMinusVk, byte num4Vk, byte num6Vk)
+        byte numPlusVk, byte numMinusVk, byte num4Vk, byte num6Vk,
+        byte f2Vk, byte f3Vk, byte f4Vk, byte f5Vk)
     {
         var exe = _launcher.FindExecutable(GameLanguage.Korean);
         if (exe is null)
@@ -295,7 +319,8 @@ public partial class MainWindowViewModel : ObservableObject
 
         try
         {
-            _keymap.Apply(exe, leftVk, rightVk, upVk, downVk, mapVk, numPlusVk, numMinusVk, num4Vk, num6Vk);
+            _keymap.Apply(exe, leftVk, rightVk, upVk, downVk, mapVk, numPlusVk, numMinusVk, num4Vk, num6Vk,
+                f2Vk, f3Vk, f4Vk, f5Vk);
             KeyMapStatus = $"적용됨: 돛 좌={LeftKey?.Display}/우={RightKey?.Display}, 선회 위={UpKey?.Display}/아래={DownKey?.Display}, 지도={MapKey?.Display}";
         }
         catch (IOException)

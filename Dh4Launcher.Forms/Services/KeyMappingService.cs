@@ -13,6 +13,11 @@ namespace Dh4Launcher.Forms.Services;
 ///   0x421A9 = 위(선회): mov ecx, 0x26 (VK_UP,   넘패드8과 OR)
 ///   0x421E9 = 아래(선회): mov ecx, 0x28 (VK_DOWN, 넘패드2와 OR)
 ///   0x422F4 = 지도    : mov ecx, 0x70 (VK_F1)
+///   0x42315 = 기능F2  : mov ecx, 0x71 (VK_F2)
+///   0x42336 = 기능F3  : mov ecx, 0x72 (VK_F3)
+///   0x42357 = 기능F4  : mov ecx, 0x73 (VK_F4)
+///   0x42378 = 기능F5  : mov ecx, 0x74 (VK_F5)
+/// 기능 키(F1~F5)는 0x21바이트 간격으로 연속된 폴링 테이블에 위치한다.
 /// 각 위치는 'B9 [VK] 00 00 00' 형태이며, VK 바이트만 바꾼다.
 /// 안전을 위해 주변 바이트(B9 .. 00 00 00) 시그니처를 검증한 뒤에만 패치한다.
 /// </summary>
@@ -23,6 +28,10 @@ public class KeyMappingService : IKeyMappingService
     private const long UpVkOffset = 0x421A9;
     private const long DownVkOffset = 0x421E9;
     private const long MapVkOffset = 0x422F4;
+    private const long F2VkOffset = 0x42315;
+    private const long F3VkOffset = 0x42336;
+    private const long F4VkOffset = 0x42357;
+    private const long F5VkOffset = 0x42378;
 
     // 보조(넘패드 기능) 키 — 넘패드 없는 키보드용으로 글자키 재매핑.
     private const long NumPlusVkOffset = 0x42102;  // 넘패드 +  (슬롯2)
@@ -39,6 +48,10 @@ public class KeyMappingService : IKeyMappingService
     public byte DefaultNumMinusVk => 0x6D; // VK_SUBTRACT
     public byte DefaultNum4Vk => 0x64;     // VK_NUMPAD4
     public byte DefaultNum6Vk => 0x66;     // VK_NUMPAD6
+    public byte DefaultF2Vk => 0x71;       // VK_F2
+    public byte DefaultF3Vk => 0x72;       // VK_F3
+    public byte DefaultF4Vk => 0x73;       // VK_F4
+    public byte DefaultF5Vk => 0x74;       // VK_F5
 
     public bool IsSupported(string exePath)
     {
@@ -65,7 +78,9 @@ public class KeyMappingService : IKeyMappingService
                 ReadByte(fs, UpVkOffset), ReadByte(fs, DownVkOffset),
                 ReadByte(fs, MapVkOffset),
                 ReadByte(fs, NumPlusVkOffset), ReadByte(fs, NumMinusVkOffset),
-                ReadByte(fs, Num4VkOffset), ReadByte(fs, Num6VkOffset));
+                ReadByte(fs, Num4VkOffset), ReadByte(fs, Num6VkOffset),
+                ReadByte(fs, F2VkOffset), ReadByte(fs, F3VkOffset),
+                ReadByte(fs, F4VkOffset), ReadByte(fs, F5VkOffset));
         }
         catch
         {
@@ -74,7 +89,8 @@ public class KeyMappingService : IKeyMappingService
     }
 
     public void Apply(string exePath, byte leftVk, byte rightVk, byte upVk, byte downVk, byte mapVk,
-        byte numPlusVk, byte numMinusVk, byte num4Vk, byte num6Vk)
+        byte numPlusVk, byte numMinusVk, byte num4Vk, byte num6Vk,
+        byte f2Vk, byte f3Vk, byte f4Vk, byte f5Vk)
     {
         using (var rfs = File.OpenRead(exePath))
         {
@@ -96,6 +112,10 @@ public class KeyMappingService : IKeyMappingService
         Write(fs, NumMinusVkOffset, numMinusVk);
         Write(fs, Num4VkOffset, num4Vk);
         Write(fs, Num6VkOffset, num6Vk);
+        Write(fs, F2VkOffset, f2Vk);
+        Write(fs, F3VkOffset, f3Vk);
+        Write(fs, F4VkOffset, f4Vk);
+        Write(fs, F5VkOffset, f5Vk);
     }
 
     private static void Write(FileStream fs, long off, byte value)
@@ -120,7 +140,8 @@ public class KeyMappingService : IKeyMappingService
     private static bool VerifySignature(FileStream fs)
     {
         foreach (var vkOff in new[] { LeftVkOffset, RightVkOffset, UpVkOffset, DownVkOffset, MapVkOffset,
-                     NumPlusVkOffset, NumMinusVkOffset, Num4VkOffset, Num6VkOffset })
+                     NumPlusVkOffset, NumMinusVkOffset, Num4VkOffset, Num6VkOffset,
+                     F2VkOffset, F3VkOffset, F4VkOffset, F5VkOffset })
         {
             if (ReadByte(fs, vkOff - 1) != 0xB9) return false;
             if (ReadByte(fs, vkOff + 1) != 0x00) return false;
