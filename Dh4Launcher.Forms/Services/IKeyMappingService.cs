@@ -6,7 +6,8 @@ namespace Dh4Launcher.Forms.Services;
 /// </summary>
 public record KeyMapState(byte LeftVk, byte RightVk, byte UpVk, byte DownVk, byte MapVk,
     byte NumPlusVk, byte NumMinusVk, byte Num4Vk, byte Num6Vk,
-    byte F2Vk, byte F3Vk, byte F4Vk, byte F5Vk);
+    byte F2Vk, byte F3Vk, byte F4Vk, byte F5Vk,
+    byte Num7Vk, byte Num9Vk, byte Num1Vk, byte Num3Vk);
 
 public interface IKeyMappingService
 {
@@ -24,6 +25,10 @@ public interface IKeyMappingService
     byte DefaultF3Vk { get; }
     byte DefaultF4Vk { get; }
     byte DefaultF5Vk { get; }
+    byte DefaultNum7Vk { get; }
+    byte DefaultNum9Vk { get; }
+    byte DefaultNum1Vk { get; }
+    byte DefaultNum3Vk { get; }
 
     /// <summary>exe가 패치 가능한(시그니처 일치) DK4HD_kr.exe 인지.</summary>
     bool IsSupported(string exePath);
@@ -34,7 +39,8 @@ public interface IKeyMappingService
     /// <summary>키들을 지정한 VK 코드로 패치한다(최초 1회 .bak 백업).</summary>
     void Apply(string exePath, byte leftVk, byte rightVk, byte upVk, byte downVk, byte mapVk,
         byte numPlusVk, byte numMinusVk, byte num4Vk, byte num6Vk,
-        byte f2Vk, byte f3Vk, byte f4Vk, byte f5Vk);
+        byte f2Vk, byte f3Vk, byte f4Vk, byte f5Vk,
+        byte num7Vk, byte num9Vk, byte num1Vk, byte num3Vk);
 
     /// <summary>게임(DK4HD_kr)이 실행 중이라 파일이 잠겨 있는지.</summary>
     bool IsGameRunning();

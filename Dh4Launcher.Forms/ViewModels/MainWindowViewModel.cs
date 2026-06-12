@@ -54,7 +54,7 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private string _statusMessage = string.Empty;
 
-    /// <summary>0 = 설정, 1 = 초상화, 2 = 컷신, 3 = 지도, 4 = 도시, 5 = 건물.</summary>
+    /// <summary>0 = 설정, 1 = 키설정, 2 = 초상화, 3 = 컷신, 4 = 지도, 5 = 도시, 6 = 건물.</summary>
     [ObservableProperty]
     private int _selectedTab;
 
@@ -70,15 +70,15 @@ public partial class MainWindowViewModel : ObservableObject
 
     partial void OnSelectedTabChanged(int value)
     {
-        if (value == 1)
+        if (value == 2)
             Portrait.EnsureLoaded();
-        else if (value == 2)
-            Cutscene.EnsureLoaded();
         else if (value == 3)
-            Map.EnsureLoaded();
+            Cutscene.EnsureLoaded();
         else if (value == 4)
-            Town.EnsureLoaded();
+            Map.EnsureLoaded();
         else if (value == 5)
+            Town.EnsureLoaded();
+        else if (value == 6)
             Building.EnsureLoaded();
     }
 
@@ -110,6 +110,7 @@ public partial class MainWindowViewModel : ObservableObject
         new("↑ 위 화살표", 0x26), new("↓ 아래 화살표", 0x28),
         new("F1", 0x70), new("F2", 0x71), new("F3", 0x72), new("F4", 0x73), new("F5", 0x74),
         new("넘패드 +", 0x6B), new("넘패드 −", 0x6D), new("넘패드 4", 0x64), new("넘패드 6", 0x66),
+        new("넘패드 7", 0x67), new("넘패드 9", 0x69), new("넘패드 1", 0x61), new("넘패드 3", 0x63),
     ];
 
     [ObservableProperty]
@@ -150,6 +151,18 @@ public partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty]
     private KeyOption? _num6Key;
+
+    [ObservableProperty]
+    private KeyOption? _num7Key;
+
+    [ObservableProperty]
+    private KeyOption? _num9Key;
+
+    [ObservableProperty]
+    private KeyOption? _num1Key;
+
+    [ObservableProperty]
+    private KeyOption? _num3Key;
 
     [ObservableProperty]
     private string _keyMapStatus = string.Empty;
@@ -256,6 +269,10 @@ public partial class MainWindowViewModel : ObservableObject
                 NumMinusKey = OptionForVk(state.NumMinusVk);
                 Num4Key = OptionForVk(state.Num4Vk);
                 Num6Key = OptionForVk(state.Num6Vk);
+                Num7Key = OptionForVk(state.Num7Vk);
+                Num9Key = OptionForVk(state.Num9Vk);
+                Num1Key = OptionForVk(state.Num1Vk);
+                Num3Key = OptionForVk(state.Num3Vk);
                 KeyMapStatus = $"현재: 돛 좌={LeftKey.Display}/우={RightKey.Display}, 선회 위={UpKey.Display}/아래={DownKey.Display}, 지도={MapKey.Display}";
             }
         }
@@ -271,11 +288,13 @@ public partial class MainWindowViewModel : ObservableObject
     {
         if (LeftKey is null || RightKey is null || UpKey is null || DownKey is null || MapKey is null
             || NumPlusKey is null || NumMinusKey is null || Num4Key is null || Num6Key is null
-            || F2Key is null || F3Key is null || F4Key is null || F5Key is null)
+            || F2Key is null || F3Key is null || F4Key is null || F5Key is null
+            || Num7Key is null || Num9Key is null || Num1Key is null || Num3Key is null)
             return;
         WriteKeyMap(LeftKey.Vk, RightKey.Vk, UpKey.Vk, DownKey.Vk, MapKey.Vk,
             NumPlusKey.Vk, NumMinusKey.Vk, Num4Key.Vk, Num6Key.Vk,
-            F2Key.Vk, F3Key.Vk, F4Key.Vk, F5Key.Vk);
+            F2Key.Vk, F3Key.Vk, F4Key.Vk, F5Key.Vk,
+            Num7Key.Vk, Num9Key.Vk, Num1Key.Vk, Num3Key.Vk);
     }
 
     [RelayCommand(CanExecute = nameof(CanEditKeyMap))]
@@ -294,15 +313,21 @@ public partial class MainWindowViewModel : ObservableObject
         NumMinusKey = OptionForVk(_keymap.DefaultNumMinusVk);
         Num4Key = OptionForVk(_keymap.DefaultNum4Vk);
         Num6Key = OptionForVk(_keymap.DefaultNum6Vk);
+        Num7Key = OptionForVk(_keymap.DefaultNum7Vk);
+        Num9Key = OptionForVk(_keymap.DefaultNum9Vk);
+        Num1Key = OptionForVk(_keymap.DefaultNum1Vk);
+        Num3Key = OptionForVk(_keymap.DefaultNum3Vk);
         WriteKeyMap(_keymap.DefaultLeftVk, _keymap.DefaultRightVk, _keymap.DefaultUpVk,
             _keymap.DefaultDownVk, _keymap.DefaultMapVk,
             _keymap.DefaultNumPlusVk, _keymap.DefaultNumMinusVk, _keymap.DefaultNum4Vk, _keymap.DefaultNum6Vk,
-            _keymap.DefaultF2Vk, _keymap.DefaultF3Vk, _keymap.DefaultF4Vk, _keymap.DefaultF5Vk);
+            _keymap.DefaultF2Vk, _keymap.DefaultF3Vk, _keymap.DefaultF4Vk, _keymap.DefaultF5Vk,
+            _keymap.DefaultNum7Vk, _keymap.DefaultNum9Vk, _keymap.DefaultNum1Vk, _keymap.DefaultNum3Vk);
     }
 
     private void WriteKeyMap(byte leftVk, byte rightVk, byte upVk, byte downVk, byte mapVk,
         byte numPlusVk, byte numMinusVk, byte num4Vk, byte num6Vk,
-        byte f2Vk, byte f3Vk, byte f4Vk, byte f5Vk)
+        byte f2Vk, byte f3Vk, byte f4Vk, byte f5Vk,
+        byte num7Vk, byte num9Vk, byte num1Vk, byte num3Vk)
     {
         var exe = _launcher.FindExecutable(GameLanguage.Korean);
         if (exe is null)
@@ -320,7 +345,7 @@ public partial class MainWindowViewModel : ObservableObject
         try
         {
             _keymap.Apply(exe, leftVk, rightVk, upVk, downVk, mapVk, numPlusVk, numMinusVk, num4Vk, num6Vk,
-                f2Vk, f3Vk, f4Vk, f5Vk);
+                f2Vk, f3Vk, f4Vk, f5Vk, num7Vk, num9Vk, num1Vk, num3Vk);
             KeyMapStatus = $"적용됨: 돛 좌={LeftKey?.Display}/우={RightKey?.Display}, 선회 위={UpKey?.Display}/아래={DownKey?.Display}, 지도={MapKey?.Display}";
         }
         catch (IOException)

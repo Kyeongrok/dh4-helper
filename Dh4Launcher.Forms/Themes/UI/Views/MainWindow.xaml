@@ -124,7 +124,7 @@
                                         Margin="8,0,0,0"
                                         Command="{Binding SelectTabCommand}"
                                         CommandParameter="1"
-                                        Content="초상화">
+                                        Content="키설정">
                                         <support:GameTabButton.Style>
                                             <Style TargetType="{x:Type support:GameTabButton}">
                                                 <Setter Property="Opacity" Value="0.5" />
@@ -141,7 +141,7 @@
                                         Margin="8,0,0,0"
                                         Command="{Binding SelectTabCommand}"
                                         CommandParameter="2"
-                                        Content="컷신">
+                                        Content="초상화">
                                         <support:GameTabButton.Style>
                                             <Style TargetType="{x:Type support:GameTabButton}">
                                                 <Setter Property="Opacity" Value="0.5" />
@@ -158,7 +158,7 @@
                                         Margin="8,0,0,0"
                                         Command="{Binding SelectTabCommand}"
                                         CommandParameter="3"
-                                        Content="지도">
+                                        Content="컷신">
                                         <support:GameTabButton.Style>
                                             <Style TargetType="{x:Type support:GameTabButton}">
                                                 <Setter Property="Opacity" Value="0.5" />
@@ -175,7 +175,7 @@
                                         Margin="8,0,0,0"
                                         Command="{Binding SelectTabCommand}"
                                         CommandParameter="4"
-                                        Content="도시">
+                                        Content="지도">
                                         <support:GameTabButton.Style>
                                             <Style TargetType="{x:Type support:GameTabButton}">
                                                 <Setter Property="Opacity" Value="0.5" />
@@ -192,12 +192,29 @@
                                         Margin="8,0,0,0"
                                         Command="{Binding SelectTabCommand}"
                                         CommandParameter="5"
-                                        Content="건물">
+                                        Content="도시">
                                         <support:GameTabButton.Style>
                                             <Style TargetType="{x:Type support:GameTabButton}">
                                                 <Setter Property="Opacity" Value="0.5" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding SelectedTab}" Value="5">
+                                                        <Setter Property="Opacity" Value="1" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </support:GameTabButton.Style>
+                                    </support:GameTabButton>
+                                    <support:GameTabButton
+                                        Width="80"
+                                        Margin="8,0,0,0"
+                                        Command="{Binding SelectTabCommand}"
+                                        CommandParameter="6"
+                                        Content="건물">
+                                        <support:GameTabButton.Style>
+                                            <Style TargetType="{x:Type support:GameTabButton}">
+                                                <Setter Property="Opacity" Value="0.5" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding SelectedTab}" Value="6">
                                                         <Setter Property="Opacity" Value="1" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -304,10 +321,19 @@
 
                                     </StackPanel>
 
-                                    <!--  ===== 오른쪽: 키매핑 =====  -->
+                                </StackPanel>
+                                </ScrollViewer>
+
+                                <!--  ===== 탭 1: 키설정 (DK4HD_kr.exe 패치) =====  -->
+                                <ScrollViewer
+                                    Grid.Row="1"
+                                    HorizontalScrollBarVisibility="Disabled"
+                                    VerticalScrollBarVisibility="Auto"
+                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=1}">
                                     <StackPanel
                                         Width="220"
-                                        Margin="24,0,0,0"
+                                        Margin="0,16"
+                                        HorizontalAlignment="Center"
                                         Orientation="Vertical">
 
                                     <!--  방향 키 매핑 (DK4HD_kr.exe 패치)  -->
@@ -485,6 +511,59 @@
                                         </StackPanel>
                                     </StackPanel>
 
+                                    <StackPanel Width="220" Margin="0,6,0,0" Orientation="Horizontal">
+                                        <StackPanel Width="105">
+                                            <TextBlock
+                                                FontSize="12"
+                                                Foreground="#9A9A9A"
+                                                Text="넘패드 7" />
+                                            <ComboBox
+                                                Margin="0,2,0,0"
+                                                Padding="8,4"
+                                                FontSize="13"
+                                                ItemsSource="{Binding Keys}"
+                                                SelectedItem="{Binding Num7Key}" />
+                                        </StackPanel>
+                                        <StackPanel Width="105" Margin="10,0,0,0">
+                                            <TextBlock
+                                                FontSize="12"
+                                                Foreground="#9A9A9A"
+                                                Text="넘패드 9" />
+                                            <ComboBox
+                                                Margin="0,2,0,0"
+                                                Padding="8,4"
+                                                FontSize="13"
+                                                ItemsSource="{Binding Keys}"
+                                                SelectedItem="{Binding Num9Key}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <StackPanel Width="220" Margin="0,6,0,0" Orientation="Horizontal">
+                                        <StackPanel Width="105">
+                                            <TextBlock
+                                                FontSize="12"
+                                                Foreground="#9A9A9A"
+                                                Text="넘패드 1" />
+                                            <ComboBox
+                                                Margin="0,2,0,0"
+                                                Padding="8,4"
+                                                FontSize="13"
+                                                ItemsSource="{Binding Keys}"
+                                                SelectedItem="{Binding Num1Key}" />
+                                        </StackPanel>
+                                        <StackPanel Width="105" Margin="10,0,0,0">
+                                            <TextBlock
+                                                FontSize="12"
+                                                Foreground="#9A9A9A"
+                                                Text="넘패드 3" />
+                                            <ComboBox
+                                                Margin="0,2,0,0"
+                                                Padding="8,4"
+                                                FontSize="13"
+                                                ItemsSource="{Binding Keys}"
+                                                SelectedItem="{Binding Num3Key}" />
+                                        </StackPanel>
+                                    </StackPanel>
+
                                     <StackPanel
                                         Width="220"
                                         Margin="0,8,0,0"
@@ -513,14 +592,13 @@
                                         Text="{Binding KeyMapStatus}"
                                         TextWrapping="Wrap" />
                                     </StackPanel>
-                                </StackPanel>
                                 </ScrollViewer>
 
-                                <!--  ===== 탭 1: 초상화 =====  -->
+                                <!--  ===== 탭 2: 초상화 =====  -->
                                 <Grid
                                     Grid.Row="1"
                                     Margin="10,4,10,10"
-                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=1}">
+                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=2}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="190" />
@@ -598,11 +676,11 @@
                                     </StackPanel>
                                 </Grid>
 
-                                <!--  ===== 탭 2: 컷신 (EventBG) =====  -->
+                                <!--  ===== 탭 3: 컷신 (EventBG) =====  -->
                                 <Grid
                                     Grid.Row="1"
                                     Margin="10,4,10,10"
-                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=2}">
+                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=3}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="190" />
@@ -680,11 +758,11 @@
                                     </StackPanel>
                                 </Grid>
 
-                                <!--  ===== 탭 3: 지도 편집기 (World.dat) =====  -->
+                                <!--  ===== 탭 4: 지도 편집기 (World.dat) =====  -->
                                 <Grid
                                     Grid.Row="1"
                                     Margin="10,4,10,10"
-                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=3}">
+                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=4}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="150" />
@@ -834,11 +912,11 @@
                                     </StackPanel>
                                 </Grid>
 
-                                <!--  ===== 탭 4: 도시 배경 (TownGrp 등) =====  -->
+                                <!--  ===== 탭 5: 도시 배경 (TownGrp 등) =====  -->
                                 <Grid
                                     Grid.Row="1"
                                     Margin="10,4,10,10"
-                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=4}">
+                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=5}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="190" />
@@ -916,11 +994,11 @@
                                     </StackPanel>
                                 </Grid>
 
-                                <!--  ===== 탭 5: 건물/상점 (Plaza) =====  -->
+                                <!--  ===== 탭 6: 건물/상점 (Plaza) =====  -->
                                 <Grid
                                     Grid.Row="1"
                                     Margin="10,4,10,10"
-                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=5}">
+                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=6}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="190" />

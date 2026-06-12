@@ -38,6 +38,10 @@ public class KeyMappingService : IKeyMappingService
     private const long NumMinusVkOffset = 0x4212B; // 넘패드 −  (슬롯3)
     private const long Num4VkOffset = 0x42154;     // 넘패드 4  (슬롯7)
     private const long Num6VkOffset = 0x42175;     // 넘패드 6  (슬롯5)
+    private const long Num7VkOffset = 0x42258;     // 넘패드 7
+    private const long Num9VkOffset = 0x4227F;     // 넘패드 9
+    private const long Num3VkOffset = 0x422A6;     // 넘패드 3
+    private const long Num1VkOffset = 0x422CD;     // 넘패드 1
 
     public byte DefaultLeftVk => 0x25;  // VK_LEFT
     public byte DefaultRightVk => 0x27; // VK_RIGHT
@@ -52,6 +56,10 @@ public class KeyMappingService : IKeyMappingService
     public byte DefaultF3Vk => 0x72;       // VK_F3
     public byte DefaultF4Vk => 0x73;       // VK_F4
     public byte DefaultF5Vk => 0x74;       // VK_F5
+    public byte DefaultNum7Vk => 0x67;     // VK_NUMPAD7
+    public byte DefaultNum9Vk => 0x69;     // VK_NUMPAD9
+    public byte DefaultNum1Vk => 0x61;     // VK_NUMPAD1
+    public byte DefaultNum3Vk => 0x63;     // VK_NUMPAD3
 
     public bool IsSupported(string exePath)
     {
@@ -80,7 +88,9 @@ public class KeyMappingService : IKeyMappingService
                 ReadByte(fs, NumPlusVkOffset), ReadByte(fs, NumMinusVkOffset),
                 ReadByte(fs, Num4VkOffset), ReadByte(fs, Num6VkOffset),
                 ReadByte(fs, F2VkOffset), ReadByte(fs, F3VkOffset),
-                ReadByte(fs, F4VkOffset), ReadByte(fs, F5VkOffset));
+                ReadByte(fs, F4VkOffset), ReadByte(fs, F5VkOffset),
+                ReadByte(fs, Num7VkOffset), ReadByte(fs, Num9VkOffset),
+                ReadByte(fs, Num1VkOffset), ReadByte(fs, Num3VkOffset));
         }
         catch
         {
@@ -90,7 +100,8 @@ public class KeyMappingService : IKeyMappingService
 
     public void Apply(string exePath, byte leftVk, byte rightVk, byte upVk, byte downVk, byte mapVk,
         byte numPlusVk, byte numMinusVk, byte num4Vk, byte num6Vk,
-        byte f2Vk, byte f3Vk, byte f4Vk, byte f5Vk)
+        byte f2Vk, byte f3Vk, byte f4Vk, byte f5Vk,
+        byte num7Vk, byte num9Vk, byte num1Vk, byte num3Vk)
     {
         using (var rfs = File.OpenRead(exePath))
         {
@@ -116,6 +127,10 @@ public class KeyMappingService : IKeyMappingService
         Write(fs, F3VkOffset, f3Vk);
         Write(fs, F4VkOffset, f4Vk);
         Write(fs, F5VkOffset, f5Vk);
+        Write(fs, Num7VkOffset, num7Vk);
+        Write(fs, Num9VkOffset, num9Vk);
+        Write(fs, Num1VkOffset, num1Vk);
+        Write(fs, Num3VkOffset, num3Vk);
     }
 
     private static void Write(FileStream fs, long off, byte value)
@@ -141,7 +156,8 @@ public class KeyMappingService : IKeyMappingService
     {
         foreach (var vkOff in new[] { LeftVkOffset, RightVkOffset, UpVkOffset, DownVkOffset, MapVkOffset,
                      NumPlusVkOffset, NumMinusVkOffset, Num4VkOffset, Num6VkOffset,
-                     F2VkOffset, F3VkOffset, F4VkOffset, F5VkOffset })
+                     F2VkOffset, F3VkOffset, F4VkOffset, F5VkOffset,
+                     Num7VkOffset, Num9VkOffset, Num1VkOffset, Num3VkOffset })
         {
             if (ReadByte(fs, vkOff - 1) != 0xB9) return false;
             if (ReadByte(fs, vkOff + 1) != 0x00) return false;
