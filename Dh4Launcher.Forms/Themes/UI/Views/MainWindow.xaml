@@ -141,7 +141,7 @@
                                         Margin="8,0,0,0"
                                         Command="{Binding SelectTabCommand}"
                                         CommandParameter="2"
-                                        Content="초상화">
+                                        Content="이미지">
                                         <support:GameTabButton.Style>
                                             <Style TargetType="{x:Type support:GameTabButton}">
                                                 <Setter Property="Opacity" Value="0.5" />
@@ -158,7 +158,7 @@
                                         Margin="8,0,0,0"
                                         Command="{Binding SelectTabCommand}"
                                         CommandParameter="3"
-                                        Content="컷신">
+                                        Content="지도">
                                         <support:GameTabButton.Style>
                                             <Style TargetType="{x:Type support:GameTabButton}">
                                                 <Setter Property="Opacity" Value="0.5" />
@@ -175,46 +175,12 @@
                                         Margin="8,0,0,0"
                                         Command="{Binding SelectTabCommand}"
                                         CommandParameter="4"
-                                        Content="지도">
+                                        Content="세이브">
                                         <support:GameTabButton.Style>
                                             <Style TargetType="{x:Type support:GameTabButton}">
                                                 <Setter Property="Opacity" Value="0.5" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding SelectedTab}" Value="4">
-                                                        <Setter Property="Opacity" Value="1" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </support:GameTabButton.Style>
-                                    </support:GameTabButton>
-                                    <support:GameTabButton
-                                        Width="80"
-                                        Margin="8,0,0,0"
-                                        Command="{Binding SelectTabCommand}"
-                                        CommandParameter="5"
-                                        Content="도시">
-                                        <support:GameTabButton.Style>
-                                            <Style TargetType="{x:Type support:GameTabButton}">
-                                                <Setter Property="Opacity" Value="0.5" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding SelectedTab}" Value="5">
-                                                        <Setter Property="Opacity" Value="1" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </support:GameTabButton.Style>
-                                    </support:GameTabButton>
-                                    <support:GameTabButton
-                                        Width="80"
-                                        Margin="8,0,0,0"
-                                        Command="{Binding SelectTabCommand}"
-                                        CommandParameter="6"
-                                        Content="건물">
-                                        <support:GameTabButton.Style>
-                                            <Style TargetType="{x:Type support:GameTabButton}">
-                                                <Setter Property="Opacity" Value="0.5" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding SelectedTab}" Value="6">
                                                         <Setter Property="Opacity" Value="1" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -594,175 +560,174 @@
                                     </StackPanel>
                                 </ScrollViewer>
 
-                                <!--  ===== 탭 2: 초상화 =====  -->
+                                <!--  ===== 탭 2: 이미지 (초상화/컷신/도시/건물 공통) =====  -->
                                 <Grid
                                     Grid.Row="1"
                                     Margin="10,4,10,10"
                                     Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=2}">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="190" />
-                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
 
-                                    <!--  갤러리  -->
-                                    <ListBox
-                                        Grid.Column="0"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        ItemsSource="{Binding Portrait.Portraits}"
-                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                        SelectedItem="{Binding Portrait.Selected}">
-                                        <ListBox.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel />
-                                            </ItemsPanelTemplate>
-                                        </ListBox.ItemsPanel>
-                                        <ListBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Width="86" Margin="2">
-                                                    <Image Width="80" Source="{Binding Thumbnail}" />
-                                                    <TextBlock
-                                                        HorizontalAlignment="Center"
-                                                        FontSize="11"
-                                                        Foreground="#EEEEEE"
-                                                        Text="{Binding Index}" />
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ListBox.ItemTemplate>
-                                    </ListBox>
-
-                                    <!--  미리보기 + 컨트롤  -->
-                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                        <ComboBox
-                                            Margin="0,0,0,6"
-                                            Padding="8,4"
-                                            DisplayMemberPath="Display"
-                                            FontSize="12"
-                                            ItemsSource="{Binding Portrait.Files}"
-                                            SelectedItem="{Binding Portrait.SelectedFile}" />
-                                        <Border Background="#33000000" CornerRadius="4" Padding="4">
-                                            <Image
-                                                Height="220"
-                                                Source="{Binding Portrait.FullImage}"
-                                                Stretch="Uniform" />
-                                        </Border>
-                                        <TextBlock
-                                            Margin="0,6,0,0"
-                                            FontSize="12"
-                                            Foreground="#DDDDDD"
-                                            Text="{Binding Portrait.Status}"
-                                            TextWrapping="Wrap" />
-                                        <support:GameFrameButton
-                                            Height="38"
-                                            Margin="0,8,0,0"
-                                            MinWidth="0"
-                                            Command="{Binding Portrait.ReplaceCommand}"
-                                            Content="이미지로 교체"
-                                            FontSize="13" />
-                                        <support:GameFrameButton
-                                            Height="34"
-                                            Margin="0,6,0,0"
-                                            MinWidth="0"
-                                            Command="{Binding Portrait.RestoreCommand}"
-                                            Content="원본으로 되돌리기"
-                                            FontSize="12" />
-                                        <support:GameFrameButton
-                                            Height="34"
-                                            Margin="0,6,0,0"
-                                            MinWidth="0"
-                                            Command="{Binding Portrait.ExportCommand}"
-                                            Content="PNG 내보내기"
-                                            FontSize="12" />
+                                    <!--  하위 메뉴 (초상화/컷신/도시/건물)  -->
+                                    <StackPanel Grid.Row="0" Margin="0,0,0,8" Orientation="Horizontal">
+                                        <support:GameTabButton
+                                            Width="70"
+                                            Command="{Binding SelectImageSubTabCommand}"
+                                            CommandParameter="0"
+                                            Content="초상화"
+                                            FontSize="12">
+                                            <support:GameTabButton.Style>
+                                                <Style TargetType="{x:Type support:GameTabButton}">
+                                                    <Setter Property="Opacity" Value="0.5" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ImageSubTab}" Value="0">
+                                                            <Setter Property="Opacity" Value="1" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </support:GameTabButton.Style>
+                                        </support:GameTabButton>
+                                        <support:GameTabButton
+                                            Width="70"
+                                            Margin="6,0,0,0"
+                                            Command="{Binding SelectImageSubTabCommand}"
+                                            CommandParameter="1"
+                                            Content="컷신"
+                                            FontSize="12">
+                                            <support:GameTabButton.Style>
+                                                <Style TargetType="{x:Type support:GameTabButton}">
+                                                    <Setter Property="Opacity" Value="0.5" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ImageSubTab}" Value="1">
+                                                            <Setter Property="Opacity" Value="1" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </support:GameTabButton.Style>
+                                        </support:GameTabButton>
+                                        <support:GameTabButton
+                                            Width="70"
+                                            Margin="6,0,0,0"
+                                            Command="{Binding SelectImageSubTabCommand}"
+                                            CommandParameter="2"
+                                            Content="도시"
+                                            FontSize="12">
+                                            <support:GameTabButton.Style>
+                                                <Style TargetType="{x:Type support:GameTabButton}">
+                                                    <Setter Property="Opacity" Value="0.5" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ImageSubTab}" Value="2">
+                                                            <Setter Property="Opacity" Value="1" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </support:GameTabButton.Style>
+                                        </support:GameTabButton>
+                                        <support:GameTabButton
+                                            Width="70"
+                                            Margin="6,0,0,0"
+                                            Command="{Binding SelectImageSubTabCommand}"
+                                            CommandParameter="3"
+                                            Content="건물"
+                                            FontSize="12">
+                                            <support:GameTabButton.Style>
+                                                <Style TargetType="{x:Type support:GameTabButton}">
+                                                    <Setter Property="Opacity" Value="0.5" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ImageSubTab}" Value="3">
+                                                            <Setter Property="Opacity" Value="1" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </support:GameTabButton.Style>
+                                        </support:GameTabButton>
                                     </StackPanel>
+
+                                    <!--  공통 갤러리 + 미리보기 (CurrentImage = 선택된 하위 메뉴 VM)  -->
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="190" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <ListBox
+                                            Grid.Column="0"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            ItemsSource="{Binding CurrentImage.Portraits}"
+                                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                            SelectedItem="{Binding CurrentImage.Selected}">
+                                            <ListBox.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel />
+                                                </ItemsPanelTemplate>
+                                            </ListBox.ItemsPanel>
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Width="120" Margin="2">
+                                                        <Image Width="114" Source="{Binding Thumbnail}" />
+                                                        <TextBlock
+                                                            HorizontalAlignment="Center"
+                                                            FontSize="11"
+                                                            Foreground="#EEEEEE"
+                                                            Text="{Binding Index}" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+
+                                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                            <ComboBox
+                                                Margin="0,0,0,6"
+                                                Padding="8,4"
+                                                DisplayMemberPath="Display"
+                                                FontSize="12"
+                                                ItemsSource="{Binding CurrentImage.Files}"
+                                                SelectedItem="{Binding CurrentImage.SelectedFile}" />
+                                            <Border Background="#33000000" CornerRadius="4" Padding="4">
+                                                <Image
+                                                    Height="200"
+                                                    Source="{Binding CurrentImage.FullImage}"
+                                                    Stretch="Uniform" />
+                                            </Border>
+                                            <TextBlock
+                                                Margin="0,6,0,0"
+                                                FontSize="12"
+                                                Foreground="#DDDDDD"
+                                                Text="{Binding CurrentImage.Status}"
+                                                TextWrapping="Wrap" />
+                                            <support:GameFrameButton
+                                                Height="38"
+                                                Margin="0,8,0,0"
+                                                MinWidth="0"
+                                                Command="{Binding CurrentImage.ReplaceCommand}"
+                                                Content="이미지로 교체"
+                                                FontSize="13" />
+                                            <support:GameFrameButton
+                                                Height="34"
+                                                Margin="0,6,0,0"
+                                                MinWidth="0"
+                                                Command="{Binding CurrentImage.RestoreCommand}"
+                                                Content="원본으로 되돌리기"
+                                                FontSize="12" />
+                                            <support:GameFrameButton
+                                                Height="34"
+                                                Margin="0,6,0,0"
+                                                MinWidth="0"
+                                                Command="{Binding CurrentImage.ExportCommand}"
+                                                Content="PNG 내보내기"
+                                                FontSize="12" />
+                                        </StackPanel>
+                                    </Grid>
                                 </Grid>
 
-                                <!--  ===== 탭 3: 컷신 (EventBG) =====  -->
+                                <!--  ===== 탭 3: 지도 편집기 (World.dat) =====  -->
                                 <Grid
                                     Grid.Row="1"
                                     Margin="10,4,10,10"
                                     Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=3}">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="190" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <!--  갤러리  -->
-                                    <ListBox
-                                        Grid.Column="0"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        ItemsSource="{Binding Cutscene.Portraits}"
-                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                        SelectedItem="{Binding Cutscene.Selected}">
-                                        <ListBox.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel />
-                                            </ItemsPanelTemplate>
-                                        </ListBox.ItemsPanel>
-                                        <ListBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Width="120" Margin="2">
-                                                    <Image Width="114" Source="{Binding Thumbnail}" />
-                                                    <TextBlock
-                                                        HorizontalAlignment="Center"
-                                                        FontSize="11"
-                                                        Foreground="#EEEEEE"
-                                                        Text="{Binding Index}" />
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ListBox.ItemTemplate>
-                                    </ListBox>
-
-                                    <!--  미리보기 + 컨트롤  -->
-                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                        <ComboBox
-                                            Margin="0,0,0,6"
-                                            Padding="8,4"
-                                            DisplayMemberPath="Display"
-                                            FontSize="12"
-                                            ItemsSource="{Binding Cutscene.Files}"
-                                            SelectedItem="{Binding Cutscene.SelectedFile}" />
-                                        <Border Background="#33000000" CornerRadius="4" Padding="4">
-                                            <Image
-                                                Height="180"
-                                                Source="{Binding Cutscene.FullImage}"
-                                                Stretch="Uniform" />
-                                        </Border>
-                                        <TextBlock
-                                            Margin="0,6,0,0"
-                                            FontSize="12"
-                                            Foreground="#DDDDDD"
-                                            Text="{Binding Cutscene.Status}"
-                                            TextWrapping="Wrap" />
-                                        <support:GameFrameButton
-                                            Height="38"
-                                            Margin="0,8,0,0"
-                                            MinWidth="0"
-                                            Command="{Binding Cutscene.ReplaceCommand}"
-                                            Content="이미지로 교체"
-                                            FontSize="13" />
-                                        <support:GameFrameButton
-                                            Height="34"
-                                            Margin="0,6,0,0"
-                                            MinWidth="0"
-                                            Command="{Binding Cutscene.RestoreCommand}"
-                                            Content="원본으로 되돌리기"
-                                            FontSize="12" />
-                                        <support:GameFrameButton
-                                            Height="34"
-                                            Margin="0,6,0,0"
-                                            MinWidth="0"
-                                            Command="{Binding Cutscene.ExportCommand}"
-                                            Content="PNG 내보내기"
-                                            FontSize="12" />
-                                    </StackPanel>
-                                </Grid>
-
-                                <!--  ===== 탭 4: 지도 편집기 (World.dat) =====  -->
-                                <Grid
-                                    Grid.Row="1"
-                                    Margin="10,4,10,10"
-                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=4}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="150" />
@@ -912,167 +877,86 @@
                                     </StackPanel>
                                 </Grid>
 
-                                <!--  ===== 탭 5: 도시 배경 (TownGrp 등) =====  -->
+                                <!--  ===== 탭 4: 세이브 편집 (savedatNN.dk4) =====  -->
                                 <Grid
                                     Grid.Row="1"
                                     Margin="10,4,10,10"
-                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=5}">
+                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=4}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="190" />
+                                        <ColumnDefinition Width="240" />
                                     </Grid.ColumnDefinitions>
 
-                                    <!--  갤러리  -->
+                                    <!--  슬롯 목록  -->
                                     <ListBox
                                         Grid.Column="0"
                                         Background="Transparent"
                                         BorderThickness="0"
-                                        ItemsSource="{Binding Town.Portraits}"
-                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                        SelectedItem="{Binding Town.Selected}">
-                                        <ListBox.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel />
-                                            </ItemsPanelTemplate>
-                                        </ListBox.ItemsPanel>
+                                        ItemsSource="{Binding SaveEdit.Slots}"
+                                        SelectedItem="{Binding SaveEdit.SelectedSlot}">
                                         <ListBox.ItemTemplate>
                                             <DataTemplate>
-                                                <StackPanel Width="120" Margin="2">
-                                                    <Image Width="114" Source="{Binding Thumbnail}" />
+                                                <Grid Margin="2,3">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="70" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
                                                     <TextBlock
-                                                        HorizontalAlignment="Center"
-                                                        FontSize="11"
+                                                        Grid.Column="0"
+                                                        FontSize="13"
                                                         Foreground="#EEEEEE"
-                                                        Text="{Binding Index}" />
-                                                </StackPanel>
+                                                        Text="{Binding SlotNumber, StringFormat='슬롯 {0}'}" />
+                                                    <TextBlock
+                                                        Grid.Column="1"
+                                                        FontSize="13"
+                                                        Foreground="#E0B45C"
+                                                        Text="{Binding Money, StringFormat='{}{0:N0}'}" />
+                                                    <TextBlock
+                                                        Grid.Column="2"
+                                                        FontSize="11"
+                                                        Foreground="#9A9A9A"
+                                                        Text="{Binding LastModified, StringFormat='MM-dd HH:mm'}" />
+                                                </Grid>
                                             </DataTemplate>
                                         </ListBox.ItemTemplate>
                                     </ListBox>
 
-                                    <!--  미리보기 + 컨트롤  -->
+                                    <!--  편집 패널  -->
                                     <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                        <ComboBox
-                                            Margin="0,0,0,6"
-                                            Padding="8,4"
-                                            DisplayMemberPath="Display"
-                                            FontSize="12"
-                                            ItemsSource="{Binding Town.Files}"
-                                            SelectedItem="{Binding Town.SelectedFile}" />
-                                        <Border Background="#33000000" CornerRadius="4" Padding="4">
-                                            <Image
-                                                Height="180"
-                                                Source="{Binding Town.FullImage}"
-                                                Stretch="Uniform" />
-                                        </Border>
-                                        <TextBlock
-                                            Margin="0,6,0,0"
-                                            FontSize="12"
-                                            Foreground="#DDDDDD"
-                                            Text="{Binding Town.Status}"
-                                            TextWrapping="Wrap" />
+                                        <support:GameLabel Margin="0,0,0,4" Content="세이브 슬롯" />
+                                        <support:GameFrameButton
+                                            Height="32"
+                                            MinWidth="0"
+                                            Command="{Binding SaveEdit.ReloadCommand}"
+                                            Content="새로고침"
+                                            FontSize="12" />
+
+                                        <support:GameLabel Margin="0,14,0,4" Content="보유 자금" />
+                                        <TextBox
+                                            Padding="8,5"
+                                            FontSize="14"
+                                            Text="{Binding SaveEdit.Money, UpdateSourceTrigger=PropertyChanged}" />
                                         <support:GameFrameButton
                                             Height="38"
                                             Margin="0,8,0,0"
                                             MinWidth="0"
-                                            Command="{Binding Town.ReplaceCommand}"
-                                            Content="이미지로 교체"
+                                            Command="{Binding SaveEdit.ApplyMoneyCommand}"
+                                            Content="자금 적용"
                                             FontSize="13" />
-                                        <support:GameFrameButton
-                                            Height="34"
-                                            Margin="0,6,0,0"
-                                            MinWidth="0"
-                                            Command="{Binding Town.RestoreCommand}"
-                                            Content="원본으로 되돌리기"
-                                            FontSize="12" />
-                                        <support:GameFrameButton
-                                            Height="34"
-                                            Margin="0,6,0,0"
-                                            MinWidth="0"
-                                            Command="{Binding Town.ExportCommand}"
-                                            Content="PNG 내보내기"
-                                            FontSize="12" />
-                                    </StackPanel>
-                                </Grid>
 
-                                <!--  ===== 탭 6: 건물/상점 (Plaza) =====  -->
-                                <Grid
-                                    Grid.Row="1"
-                                    Margin="10,4,10,10"
-                                    Visibility="{Binding SelectedTab, Converter={StaticResource EqVis}, ConverterParameter=6}">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="190" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <!--  갤러리  -->
-                                    <ListBox
-                                        Grid.Column="0"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        ItemsSource="{Binding Building.Portraits}"
-                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                        SelectedItem="{Binding Building.Selected}">
-                                        <ListBox.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel />
-                                            </ItemsPanelTemplate>
-                                        </ListBox.ItemsPanel>
-                                        <ListBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Width="120" Margin="2">
-                                                    <Image Width="114" Source="{Binding Thumbnail}" />
-                                                    <TextBlock
-                                                        HorizontalAlignment="Center"
-                                                        FontSize="11"
-                                                        Foreground="#EEEEEE"
-                                                        Text="{Binding Index}" />
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ListBox.ItemTemplate>
-                                    </ListBox>
-
-                                    <!--  미리보기 + 컨트롤  -->
-                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                        <ComboBox
-                                            Margin="0,0,0,6"
-                                            Padding="8,4"
-                                            DisplayMemberPath="Display"
-                                            FontSize="12"
-                                            ItemsSource="{Binding Building.Files}"
-                                            SelectedItem="{Binding Building.SelectedFile}" />
-                                        <Border Background="#33000000" CornerRadius="4" Padding="4">
-                                            <Image
-                                                Height="180"
-                                                Source="{Binding Building.FullImage}"
-                                                Stretch="Uniform" />
-                                        </Border>
                                         <TextBlock
-                                            Margin="0,6,0,0"
+                                            Margin="0,10,0,0"
                                             FontSize="12"
                                             Foreground="#DDDDDD"
-                                            Text="{Binding Building.Status}"
+                                            Text="{Binding SaveEdit.Status}"
                                             TextWrapping="Wrap" />
-                                        <support:GameFrameButton
-                                            Height="38"
-                                            Margin="0,8,0,0"
-                                            MinWidth="0"
-                                            Command="{Binding Building.ReplaceCommand}"
-                                            Content="이미지로 교체"
-                                            FontSize="13" />
-                                        <support:GameFrameButton
-                                            Height="34"
-                                            Margin="0,6,0,0"
-                                            MinWidth="0"
-                                            Command="{Binding Building.RestoreCommand}"
-                                            Content="원본으로 되돌리기"
-                                            FontSize="12" />
-                                        <support:GameFrameButton
-                                            Height="34"
-                                            Margin="0,6,0,0"
-                                            MinWidth="0"
-                                            Command="{Binding Building.ExportCommand}"
-                                            Content="PNG 내보내기"
-                                            FontSize="12" />
+                                        <TextBlock
+                                            Margin="0,10,0,0"
+                                            FontSize="11"
+                                            Foreground="#C8A050"
+                                            Text="※ 게임을 완전히 종료한 뒤 적용하세요. 첫 적용 시 원본은 .bak으로 자동 백업됩니다."
+                                            TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Grid>
 

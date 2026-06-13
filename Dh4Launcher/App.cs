@@ -47,11 +47,13 @@ public class App : Application
         services.AddSingleton<IUpdateService, UpdateService>();
         services.AddSingleton<IPortraitService, PortraitService>();
         services.AddSingleton<IWorldMapService, WorldMapService>();
+        services.AddSingleton<ISaveEditService, SaveEditService>();
         services.AddSingleton<PortraitViewModel>();
         services.AddSingleton<CutsceneViewModel>();
         services.AddSingleton<WorldMapViewModel>();
         services.AddSingleton<TownViewModel>();
         services.AddSingleton<BuildingViewModel>();
+        services.AddSingleton<SaveEditViewModel>();
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<MainWindow>();
     }

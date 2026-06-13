@@ -54,9 +54,13 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private string _statusMessage = string.Empty;
 
-    /// <summary>0 = 설정, 1 = 키설정, 2 = 초상화, 3 = 컷신, 4 = 지도, 5 = 도시, 6 = 건물.</summary>
+    /// <summary>0 = 설정, 1 = 키설정, 2 = 이미지, 3 = 지도, 4 = 세이브.</summary>
     [ObservableProperty]
     private int _selectedTab;
+
+    /// <summary>이미지 탭의 하위 메뉴. 0 = 초상화, 1 = 컷신, 2 = 도시, 3 = 건물.</summary>
+    [ObservableProperty]
+    private int _imageSubTab;
 
     public PortraitViewModel Portrait { get; }
 
@@ -68,22 +72,39 @@ public partial class MainWindowViewModel : ObservableObject
 
     public BuildingViewModel Building { get; }
 
+    public SaveEditViewModel SaveEdit { get; }
+
+    /// <summary>이미지 탭 하위 메뉴가 가리키는 갤러리 VM (네 종류 모두 PortraitViewModel 모양).</summary>
+    public PortraitViewModel CurrentImage => ImageSubTab switch
+    {
+        1 => Cutscene,
+        2 => Town,
+        3 => Building,
+        _ => Portrait,
+    };
+
     partial void OnSelectedTabChanged(int value)
     {
         if (value == 2)
-            Portrait.EnsureLoaded();
+            CurrentImage.EnsureLoaded();
         else if (value == 3)
-            Cutscene.EnsureLoaded();
-        else if (value == 4)
             Map.EnsureLoaded();
-        else if (value == 5)
-            Town.EnsureLoaded();
-        else if (value == 6)
-            Building.EnsureLoaded();
+        else if (value == 4)
+            SaveEdit.EnsureLoaded();
+    }
+
+    partial void OnImageSubTabChanged(int value)
+    {
+        OnPropertyChanged(nameof(CurrentImage));
+        if (SelectedTab == 2)
+            CurrentImage.EnsureLoaded();
     }
 
     [RelayCommand]
     private void SelectTab(object? index) => SelectedTab = System.Convert.ToInt32(index);
+
+    [RelayCommand]
+    private void SelectImageSubTab(object? index) => ImageSubTab = System.Convert.ToInt32(index);
 
     [ObservableProperty]
     private string _gamePath = string.Empty;
@@ -172,7 +193,7 @@ public partial class MainWindowViewModel : ObservableObject
     public MainWindowViewModel(IGameSettingsService settings, IGameLauncherService launcher,
         IGpuService gpu, IKeyMappingService keymap, IUpdateService updates,
         PortraitViewModel portrait, CutsceneViewModel cutscene, WorldMapViewModel map,
-        TownViewModel town, BuildingViewModel building)
+        TownViewModel town, BuildingViewModel building, SaveEditViewModel saveEdit)
     {
         _settings = settings;
         _launcher = launcher;
@@ -184,6 +205,7 @@ public partial class MainWindowViewModel : ObservableObject
         Map = map;
         Town = town;
         Building = building;
+        SaveEdit = saveEdit;
         _gpuName = _gpu.HighPerformanceGpuName;
 
         SelectedLanguage = Languages.First(l => l.Language == GameLanguage.Korean);
