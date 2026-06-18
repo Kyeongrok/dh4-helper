@@ -33,6 +33,12 @@ public interface IKeyMappingService
     /// <summary>exe가 패치 가능한(시그니처 일치) DK4HD_kr.exe 인지.</summary>
     bool IsSupported(string exePath);
 
+    /// <summary>
+    /// 스팀판(SteamStub DRM)으로 보호된 exe 인지. 스팀판은 코드(.text)가 디스크에서 암호화돼
+    /// 있어 정적 바이트 패치가 불가능하다 — PE에 <c>.bind</c> 섹션이 있으면 스팀판으로 판정한다.
+    /// </summary>
+    bool IsSteamProtected(string exePath);
+
     /// <summary>현재 키 매핑을 읽는다. 미지원이면 null.</summary>
     KeyMapState? Read(string exePath);
 

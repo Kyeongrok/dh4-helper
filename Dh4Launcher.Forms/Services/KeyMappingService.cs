@@ -74,6 +74,52 @@ public class KeyMappingService : IKeyMappingService
         }
     }
 
+    public bool IsSteamProtected(string exePath)
+    {
+        try
+        {
+            using var fs = File.OpenRead(exePath);
+            return HasBindSection(fs);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    // PE 섹션 테이블에 SteamStub의 '.bind' 섹션이 있는지 확인한다.
+    private static bool HasBindSection(FileStream fs)
+    {
+        int peOff = ReadInt32(fs, 0x3C);
+        if (ReadByte(fs, peOff) != (byte)'P' || ReadByte(fs, peOff + 1) != (byte)'E')
+            return false;
+        int numSections = ReadByte(fs, peOff + 6) | (ReadByte(fs, peOff + 7) << 8);
+        int optHeaderSize = ReadByte(fs, peOff + 20) | (ReadByte(fs, peOff + 21) << 8);
+        long secTable = peOff + 24 + optHeaderSize;
+        for (int i = 0; i < numSections; i++)
+        {
+            long nameOff = secTable + i * 40L;
+            var name = new byte[6];
+            fs.Seek(nameOff, SeekOrigin.Begin);
+            if (fs.Read(name, 0, 6) != 6)
+                break;
+            // ".bind\0"
+            if (name[0] == (byte)'.' && name[1] == (byte)'b' && name[2] == (byte)'i'
+                && name[3] == (byte)'n' && name[4] == (byte)'d' && name[5] == 0)
+                return true;
+        }
+        return false;
+    }
+
+    private static int ReadInt32(FileStream fs, long off)
+    {
+        fs.Seek(off, SeekOrigin.Begin);
+        var b = new byte[4];
+        if (fs.Read(b, 0, 4) != 4)
+            throw new EndOfStreamException();
+        return b[0] | (b[1] << 8) | (b[2] << 16) | (b[3] << 24);
+    }
+
     public KeyMapState? Read(string exePath)
     {
         try

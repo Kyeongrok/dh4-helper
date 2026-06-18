@@ -275,7 +275,9 @@ public partial class MainWindowViewModel : ObservableObject
             if (state is null)
             {
                 _keyMapAvailable = false;
-                KeyMapStatus = "이 exe는 키매핑 미지원 (시그니처 불일치)";
+                KeyMapStatus = _keymap.IsSteamProtected(exe)
+                    ? "스팀판은 키 매핑을 지원하지 않습니다. (스팀 DRM이 코드를 암호화해 패치 불가)"
+                    : "이 exe는 키매핑 미지원 (시그니처 불일치)";
             }
             else
             {
