@@ -16,7 +16,4 @@ public interface ISaveEditService
 
     /// <summary>해당 슬롯 파일의 자금을 바꾼다(최초 1회 .bak 백업). DK4 세이브가 아니면 예외.</summary>
     void WriteMoney(string savePath, int money);
-
-    /// <summary>게임(DK4HD_*)이 실행 중이라 파일이 잠겨 있을 수 있는지.</summary>
-    bool IsGameRunning();
 }

@@ -82,21 +82,16 @@ public partial class SaveEditViewModel : ObservableObject
             return;
         }
 
-        if (_saves.IsGameRunning())
-        {
-            Status = "게임이 실행 중입니다. 종료한 뒤 다시 시도하세요.";
-            return;
-        }
-
+        // 게임 실행 중에도 편집 허용 — 적용 후 인게임에서 불러오기 하면 반영된다.
         try
         {
             _saves.WriteMoney(slot.FullPath, Money);
-            Status = $"슬롯 {slot.SlotNumber} 자금 {Money:N0}으로 적용됨 (원본은 {slot.FileName}.bak 백업).";
+            Status = $"슬롯 {slot.SlotNumber} 자금 {Money:N0}으로 적용됨 (원본은 {slot.FileName}.bak 백업). 게임에서 해당 슬롯을 다시 불러오세요.";
             Reload();
         }
         catch (System.IO.IOException)
         {
-            Status = "파일이 잠겨 있습니다 (게임 종료 후 재시도).";
+            Status = "파일이 잠겨 있습니다. 게임에서 세이브/로드 중이면 잠시 후 다시 시도하세요.";
         }
         catch (System.Exception ex)
         {
