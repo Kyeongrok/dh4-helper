@@ -18,6 +18,15 @@ public class GameLauncherService : IGameLauncherService
     private const string GpuPrefKey = @"SOFTWARE\Microsoft\DirectX\UserGpuPreferences";
     private const string HighPerformanceValue = "GpuPreference=2;";
 
+    // '높은 DPI 배율 재정의' AppCompat 키. HIGHDPIAWARE = 재정의를 '응용 프로그램'으로 지정.
+    private const string LayersKey = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers";
+    private const string HighDpiToken = "HIGHDPIAWARE";
+
+    // 서로 충돌하는 DPI 관련 토큰들. 우리 토큰을 넣기 전에 걷어낸다.
+    private static readonly string[] DpiTokens =
+        ["HIGHDPIAWARE", "DPIUNAWARE", "GDIDPISCALING",
+         "PERPROCESSSYSTEMDPIFORCEON", "PERPROCESSSYSTEMDPIFORCEOFF"];
+
     public string? GameDirectory
     {
         get
@@ -59,6 +68,11 @@ public class GameLauncherService : IGameLauncherService
 
     public void Launch(string exePath)
     {
+        // 고배율(4K 175% 등) 모니터에서 창이 축소되어 뜨는 것을 막는다.
+        // DK4HD 는 DPI 미인식 게임이라, Windows 가 화면을 가상화하지 않도록
+        // '높은 DPI 배율 재정의 = 응용 프로그램'을 걸어 실제 해상도를 그대로 넘겨준다.
+        EnsureHighDpiOverride(exePath);
+
         var dir = Path.GetDirectoryName(exePath)!;
         Process.Start(new ProcessStartInfo
         {
@@ -68,6 +82,21 @@ public class GameLauncherService : IGameLauncherService
         });
 
         GameDirectory = dir; // 다음 실행 때 자동으로 찾도록 기억
+    }
+
+    /// <summary>해당 exe 에 HIGHDPIAWARE 오버라이드가 없으면 추가한다(다른 호환성 토큰은 보존).</summary>
+    private static void EnsureHighDpiOverride(string exePath)
+    {
+        using var key = Registry.CurrentUser.CreateSubKey(LayersKey, writable: true);
+
+        // 기존 값에서 '~' 접두사와 충돌하는 DPI 토큰을 제거하고 HIGHDPIAWARE 를 넣는다.
+        var existing = (key.GetValue(exePath) as string)?.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            ?? [];
+        var tokens = existing
+            .Where(t => t != "~" && !DpiTokens.Contains(t, StringComparer.OrdinalIgnoreCase))
+            .Prepend(HighDpiToken);
+
+        key.SetValue(exePath, "~ " + string.Join(' ', tokens), RegistryValueKind.String);
     }
 
     public bool IsHighPerformanceGpu(string exePath)

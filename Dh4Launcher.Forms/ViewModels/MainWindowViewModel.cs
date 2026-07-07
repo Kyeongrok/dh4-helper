@@ -21,7 +21,8 @@ public partial class MainWindowViewModel : ObservableObject
     private bool _keyMapAvailable;
 
     /// <summary>
-    /// 선택 가능한 해상도. 원본 런처와 달리 1920x1080 위쪽(QHD/4K)도 포함한다.
+    /// 선택 가능한 해상도. 원본 런처와 달리 1920x1080 위쪽(QHD)까지 포함한다.
+    /// 3840x2160(4K)은 DPI 미인식 게임 특성상 고배율 모니터에서 정상 표시되지 않아 제외.
     /// </summary>
     public ObservableCollection<ScreenResolution> Resolutions { get; } =
     [
@@ -31,7 +32,6 @@ public partial class MainWindowViewModel : ObservableObject
         new(1920, 1200),
         new(2560, 1440),
         new(2560, 1600),
-        new(3840, 2160),
     ];
 
     public ObservableCollection<GameLanguageOption> Languages { get; } =
