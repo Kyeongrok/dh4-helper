@@ -63,13 +63,37 @@ public class MainWindow : Dh4LauncherWindow
 
         Point lastPan = default;
 
+        // 손 도구 상태에 따라 커서 변경
+        void UpdateCursor()
+        {
+            var map = Map();
+            image.Cursor = map?.IsPanMode == true
+                ? (Mouse.LeftButton == MouseButtonState.Pressed ? Cursors.SizeAll : Cursors.Hand)
+                : null;
+        }
+        if (Map() is { } m0)
+            m0.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(WorldMapViewModel.IsPanMode))
+                    UpdateCursor();
+            };
+
         image.MouseLeftButtonDown += (s, e) =>
         {
+            var map = Map();
             var p = e.GetPosition(image);
-            Map()?.PaintAtScreen(p.X, p.Y);
+            if (map?.IsPanMode == true)
+                lastPan = p; // 손 도구: 드래그 시작
+            else
+                map?.PaintAtScreen(p.X, p.Y);
             image.CaptureMouse();
+            UpdateCursor();
         };
-        image.MouseLeftButtonUp += (s, e) => image.ReleaseMouseCapture();
+        image.MouseLeftButtonUp += (s, e) =>
+        {
+            image.ReleaseMouseCapture();
+            UpdateCursor();
+        };
 
         image.MouseRightButtonDown += (s, e) =>
         {
@@ -86,9 +110,9 @@ public class MainWindow : Dh4LauncherWindow
             var p = e.GetPosition(image);
             map.HoverAtScreen(p.X, p.Y);
 
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if (e.LeftButton == MouseButtonState.Pressed && !map.IsPanMode)
                 map.PaintAtScreen(p.X, p.Y);
-            else if (e.RightButton == MouseButtonState.Pressed)
+            else if (e.LeftButton == MouseButtonState.Pressed || e.RightButton == MouseButtonState.Pressed)
             {
                 map.PanByPixels(p.X - lastPan.X, p.Y - lastPan.Y);
                 lastPan = p;

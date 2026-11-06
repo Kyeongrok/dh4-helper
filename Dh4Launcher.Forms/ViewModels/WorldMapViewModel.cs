@@ -17,34 +17,50 @@ public partial class WorldMapViewModel : ObservableObject
     private readonly IWorldMapService _svc;
     private readonly IGameLauncherService _launcher;
 
-    private byte[]? _data;
-    private int[][]? _tiles;   // 256개 타일, 각 64*64 BGRA
+    private ushort[]? _data;   // Width*Height 칸, 칸당 타일 번호
+    private int[][]? _tiles;   // 1024개 타일, 각 32*32 BGRA
     private string? _path;
     private bool _loaded;
     private bool _firstView = true;
 
-    private int _src;          // 타일 원본 px(64)
+    private int _src;          // 타일 원본 px(32)
     private int _vw, _vh;      // 캔버스 px
     private int[]? _buf;       // 캔버스 픽셀 버퍼
     private int _tilePx = 10;  // 줌(타일당 화면 px)
     private int _originX, _originY; // 좌상단 타일
     private double _panAccX, _panAccY;
 
-    public int Size => _svc.Size;
+    private int MapW => _svc.Width;
+    private int MapH => _svc.Height;
+
+    // 첫 진입 시 보여줄 곳(지중해)
+    private const int HomeX = 1440, HomeY = 380;
 
     [ObservableProperty]
     private WriteableBitmap? _bitmap;
 
-    /// <summary>Mode: 0=칠하기(PaintValue), 2=스포이드.</summary>
+    /// <summary>Mode: 0=칠하기, 2=스포이드.</summary>
     [ObservableProperty]
     private int _mode;
 
+    /// <summary>칠할 것: Sea=바다, Block=2x2 블록 기준 번호(칸 위치에 맞춰 +0/+1/+16/+17), Single=타일 번호 그대로.</summary>
+    private enum PaintKind { Sea, Block, Single }
+
+    private PaintKind _paintKind = PaintKind.Sea;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PaintValueText))]
-    private byte _paintValue;
+    private int _paintValue;
 
     [ObservableProperty]
     private int _brushRadius = 1;
+
+    /// <summary>손 도구: 켜면 왼쪽 드래그가 칠하기 대신 지도 스크롤.</summary>
+    [ObservableProperty]
+    private bool _isPanMode;
+
+    partial void OnIsPanModeChanged(bool value)
+        => Status = value ? "손 도구 — 드래그해서 지도를 옮기세요" : "칠하기 모드";
 
     [ObservableProperty]
     private string _status = string.Empty;
@@ -52,7 +68,29 @@ public partial class WorldMapViewModel : ObservableObject
     [ObservableProperty]
     private string _cursorText = string.Empty;
 
-    public string PaintValueText => $"칠할 값: {PaintValue} ({(PaintValue < 32 ? "바다" : "육지/해안")})";
+    public string PaintValueText => _paintKind switch
+    {
+        PaintKind.Sea => "칠할 것: 바다",
+        PaintKind.Block => $"칠할 것: 지형 블록 {PaintValue}",
+        _ => $"칠할 것: 타일 {PaintValue}",
+    };
+
+    /// <summary>바다 타일(2x2 패턴: 짝수 행 0,1 / 홀수 행 17,16 — 원본 데이터와 동일).</summary>
+    private static ushort SeaTileAt(int x, int y)
+        => (ushort)((y & 1) == 0 ? ((x & 1) == 0 ? 0 : 1) : ((x & 1) == 0 ? 17 : 16));
+
+    private static bool IsBlockAligned(int v, int x, int y)
+    {
+        int b = v - (x & 1) - 16 * (y & 1);
+        return b >= 0 && (b & 1) == 0 && ((b >> 4) & 1) == 0;
+    }
+
+    private ushort TileFor(int x, int y) => _paintKind switch
+    {
+        PaintKind.Sea => SeaTileAt(x, y),
+        PaintKind.Block => (ushort)(PaintValue + (x & 1) + 16 * (y & 1)),
+        _ => (ushort)PaintValue,
+    };
 
     public WorldMapViewModel(IWorldMapService svc, IGameLauncherService launcher)
     {
@@ -77,9 +115,9 @@ public partial class WorldMapViewModel : ObservableObject
         {
             _data = _svc.Load(_path);
             _tiles = _svc.LoadTiles(_launcher.GameDirectory);
-            Status = $"World.dat 로드됨 ({Size}×{Size}) · 타일을 찍어 편집하세요";
+            Status = $"World.dat 로드됨 ({MapW}×{MapH}) · 타일을 찍어 편집하세요";
             RestoreCommand.NotifyCanExecuteChanged();
-            if (_vw > 0 && _firstView) { _firstView = false; CenterOn(1250, 1000); }
+            if (_vw > 0 && _firstView) { _firstView = false; CenterOn(HomeX, HomeY); }
             Render();
         }
         catch (Exception ex)
@@ -102,7 +140,7 @@ public partial class WorldMapViewModel : ObservableObject
         if (_firstView && _data is not null)
         {
             _firstView = false;
-            CenterOn(1250, 1000); // 첫 진입 시 지도 중앙
+            CenterOn(HomeX, HomeY); // 첫 진입 시 지중해
         }
         Render();
     }
@@ -112,8 +150,8 @@ public partial class WorldMapViewModel : ObservableObject
 
     private void ClampOrigin()
     {
-        _originX = Math.Clamp(_originX, 0, Math.Max(0, Size - Math.Max(1, _vw / Math.Max(1, _tilePx))));
-        _originY = Math.Clamp(_originY, 0, Math.Max(0, Size - Math.Max(1, _vh / Math.Max(1, _tilePx))));
+        _originX = Math.Clamp(_originX, 0, Math.Max(0, MapW - Math.Max(1, _vw / Math.Max(1, _tilePx))));
+        _originY = Math.Clamp(_originY, 0, Math.Max(0, MapH - Math.Max(1, _vh / Math.Max(1, _tilePx))));
     }
 
     // 타일 투명부 아래로 보일 바다색(게임처럼 바다 위에 지형 타일을 합성).
@@ -130,14 +168,16 @@ public partial class WorldMapViewModel : ObservableObject
         for (int ry = 0; ry < down; ry++)
         {
             int ty = _originY + ry;
-            if (ty < 0 || ty >= Size) continue;
+            if (ty < 0 || ty >= MapH) continue;
             int py0 = ry * px;
-            int rowBase = ty * Size;
+            int rowBase = ty * MapW;
             for (int rx = 0; rx < across; rx++)
             {
                 int tx = _originX + rx;
-                if (tx < 0 || tx >= Size) continue;
-                var tile = _tiles[_data[rowBase + tx]];
+                if (tx < 0 || tx >= MapW) continue;
+                int v = _data[rowBase + tx];
+                if (v >= _tiles.Length) continue;
+                var tile = _tiles[v];
                 int px0 = rx * px;
                 for (int yy = 0; yy < px; yy++)
                 {
@@ -181,21 +221,27 @@ public partial class WorldMapViewModel : ObservableObject
     {
         if (_data is null || _tiles is null) return;
         var (tx, ty) = ScreenToTile(sx, sy);
-        if (tx < 0 || ty < 0 || tx >= Size || ty >= Size) return;
+        if (tx < 0 || ty < 0 || tx >= MapW || ty >= MapH) return;
 
         if (Mode == 2)
         {
-            PaintValue = _data[ty * Size + tx];
+            int v = _data[ty * MapW + tx];
+            if (WorldMapService.IsSeaTile(v))
+                SetPaint(PaintKind.Sea, 0);
+            else if (IsBlockAligned(v, tx, ty))
+                SetPaint(PaintKind.Block, v - (tx & 1) - 16 * (ty & 1));
+            else
+                SetPaint(PaintKind.Single, v);
             Mode = 0;
-            Status = $"값 복사됨: {PaintValue} — 이제 칠할 수 있습니다";
+            Status = $"복사됨 — {PaintValueText}";
             return;
         }
         for (int dy = -BrushRadius; dy <= BrushRadius; dy++)
             for (int dx = -BrushRadius; dx <= BrushRadius; dx++)
             {
                 int x = tx + dx, y = ty + dy;
-                if (x >= 0 && y >= 0 && x < Size && y < Size)
-                    _data[y * Size + x] = PaintValue;
+                if (x >= 0 && y >= 0 && x < MapW && y < MapH)
+                    _data[y * MapW + x] = TileFor(x, y);
             }
         Render();
     }
@@ -204,8 +250,9 @@ public partial class WorldMapViewModel : ObservableObject
     {
         if (_data is null) return;
         var (tx, ty) = ScreenToTile(sx, sy);
-        if (tx < 0 || ty < 0 || tx >= Size || ty >= Size) return;
-        CursorText = $"({tx}, {ty}) = {_data[ty * Size + tx]}";
+        if (tx < 0 || ty < 0 || tx >= MapW || ty >= MapH) return;
+        int v = _data[ty * MapW + tx];
+        CursorText = $"({tx}, {ty}) = {v}{(WorldMapService.IsSeaTile(v) ? " 바다" : "")}";
     }
 
     public void PanByPixels(double dxPx, double dyPx)
@@ -240,13 +287,21 @@ public partial class WorldMapViewModel : ObservableObject
     // ===== 커맨드 =====
 
     [RelayCommand]
-    private void SetModeSea() { Mode = 0; PaintValue = 0; Status = "바다(0)로 칠하기 — 육지를 찍으면 항로가 뚫립니다"; }
+    private void SetModeSea() { IsPanMode = false; Mode = 0; SetPaint(PaintKind.Sea, 0); Status = "바다로 칠하기 — 육지를 찍으면 항로가 뚫립니다"; }
+
+    // 6 = 초원 2x2 블록(타일 6,7,22,23)
+    [RelayCommand]
+    private void SetModeLand() { IsPanMode = false; Mode = 0; SetPaint(PaintKind.Block, 6); Status = "육지(초원)로 칠하기 — 다른 지형은 스포이드로 복사"; }
+
+    private void SetPaint(PaintKind kind, int value)
+    {
+        _paintKind = kind;
+        PaintValue = value;
+        OnPropertyChanged(nameof(PaintValueText));
+    }
 
     [RelayCommand]
-    private void SetModeLand() { Mode = 0; PaintValue = 128; Status = "육지(128)로 칠하기"; }
-
-    [RelayCommand]
-    private void SetModeEyedropper() { Mode = 2; Status = "스포이드 — 복사할 바다/육지 타일을 클릭하세요"; }
+    private void SetModeEyedropper() { IsPanMode = false; Mode = 2; Status = "스포이드 — 복사할 바다/육지 타일을 클릭하세요"; }
 
     [RelayCommand]
     private void BrushSmall() => BrushRadius = 0;
@@ -264,10 +319,10 @@ public partial class WorldMapViewModel : ObservableObject
     private void ZoomOut() => ZoomAtCursor(-1, _vw / 2.0, _vh / 2.0);
 
     [RelayCommand]
-    private void JumpSuez() { CenterOn(420, 820); Render(); }
+    private void JumpSuez() { CenterOn(1475, 412); Render(); }
 
     [RelayCommand]
-    private void JumpPanama() { CenterOn(2360, 1080); Render(); }
+    private void JumpPanama() { CenterOn(690, 565); Render(); }
 
     [RelayCommand]
     private void Save()

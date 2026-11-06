@@ -741,14 +741,77 @@
                                         BorderBrush="#241809"
                                         BorderThickness="1"
                                         ClipToBounds="True">
-                                        <Image
-                                            x:Name="PART_MapImage"
-                                            HorizontalAlignment="Left"
-                                            VerticalAlignment="Top"
-                                            RenderOptions.BitmapScalingMode="NearestNeighbor"
-                                            RenderOptions.EdgeMode="Aliased"
-                                            Source="{Binding Map.Bitmap}"
-                                            Stretch="None" />
+                                        <Grid>
+                                            <Image
+                                                x:Name="PART_MapImage"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                                RenderOptions.EdgeMode="Aliased"
+                                                Source="{Binding Map.Bitmap}"
+                                                Stretch="None" />
+
+                                            <!--  손 도구: 켜면 왼쪽 드래그로 지도 스크롤(칠하기 대신)  -->
+                                            <ToggleButton
+                                                x:Name="PART_MapPanToggle"
+                                                Width="34"
+                                                Height="34"
+                                                Margin="6"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                Cursor="Arrow"
+                                                IsChecked="{Binding Map.IsPanMode, Mode=TwoWay}"
+                                                ToolTip="손 도구 — 드래그로 지도 이동 (다시 누르면 칠하기)">
+                                                <ToggleButton.Template>
+                                                    <ControlTemplate TargetType="ToggleButton">
+                                                        <Border
+                                                            x:Name="Bd"
+                                                            Background="#CC1A120A"
+                                                            BorderBrush="#8A6A3A"
+                                                            BorderThickness="1"
+                                                            CornerRadius="4">
+                                                            <TextBlock
+                                                                x:Name="Glyph"
+                                                                HorizontalAlignment="Center"
+                                                                VerticalAlignment="Center"
+                                                                FontFamily="Segoe UI Symbol"
+                                                                FontSize="18"
+                                                                Foreground="#E0C89A"
+                                                                Text="&#x270B;" />
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="Bd" Property="BorderBrush" Value="#E0B45C" />
+                                                            </Trigger>
+                                                            <Trigger Property="IsChecked" Value="True">
+                                                                <Setter TargetName="Bd" Property="Background" Value="#E0B45C" />
+                                                                <Setter TargetName="Bd" Property="BorderBrush" Value="#FFF0C8" />
+                                                                <Setter TargetName="Glyph" Property="Foreground" Value="#241809" />
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </ToggleButton.Template>
+                                            </ToggleButton>
+
+                                            <!--  조작 안내 (클릭은 지도로 통과)  -->
+                                            <Border
+                                                Margin="6"
+                                                Padding="7,4"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Bottom"
+                                                Background="#B31A120A"
+                                                CornerRadius="4"
+                                                IsHitTestVisible="False">
+                                                <TextBlock
+                                                    FontSize="11"
+                                                    Foreground="#E0C89A"
+                                                    LineHeight="16">
+                                                    <Run Text="휠: 위아래 · Shift+휠: 좌우" />
+                                                    <LineBreak />
+                                                    <Run Text="Ctrl+휠: 확대/축소 · 우클릭 드래그: 이동" />
+                                                </TextBlock>
+                                            </Border>
+                                        </Grid>
                                     </Border>
 
                                     <!--  편집 컨트롤  -->
