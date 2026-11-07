@@ -44,6 +44,9 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 
+# 네이티브 플러그인 빌드 산출물 (CMake)
+plugins-src/build/
+
 # OS generated files
 .DS_Store
 Thumbs.db
